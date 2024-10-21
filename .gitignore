@@ -1,0 +1,22 @@
+# Java-related ignores
+/target/
+*.class
+*.jar
+*.war
+*.ear
+*.iml
+/.idea/
+.gradle/
+/mvn/
+mvnw
+mvnw.cmd
+
+# Node.js / Vue.js ignores
+node_modules/
+dist/
+npm-debug.log
+yarn-error.log
+
+# OS-specific ignores
+.DS_Store
+Thumbs.db
