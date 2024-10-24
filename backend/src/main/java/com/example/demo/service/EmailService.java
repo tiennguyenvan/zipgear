@@ -17,20 +17,22 @@ public class EmailService {
         this.sendGrid = sendGrid;
     }
 
+	// temprorary disable for fast testing
     public void sendEmail(String to, String subject, String body) throws IOException {
-        Email from = new Email("contact@sneeit.com");
-        Email recipient = new Email(to);
-        Content content = new Content("text/plain", body);
-        Mail mail = new Mail(from, subject, recipient, content);
+		
+        // Email from = new Email("contact@sneeit.com");
+        // Email recipient = new Email(to);
+        // Content content = new Content("text/plain", body);
+        // Mail mail = new Mail(from, subject, recipient, content);
 
-        Request request = new Request();
-        request.setMethod(Method.POST);
-        request.setEndpoint("mail/send");
-        request.setBody(mail.build());
+        // Request request = new Request();
+        // request.setMethod(Method.POST);
+        // request.setEndpoint("mail/send");
+        // request.setBody(mail.build());
 
-        Response response = sendGrid.api(request);
-        System.out.println(response.getStatusCode());
-        System.out.println(response.getBody());
-        System.out.println(response.getHeaders());
+        // Response response = sendGrid.api(request);
+        // System.out.println(response.getStatusCode());
+        // System.out.println(response.getBody());
+        // System.out.println(response.getHeaders());
     }
 }

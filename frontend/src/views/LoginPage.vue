@@ -1,67 +1,152 @@
 <template>
-	<div>
-		<h1># zipGear</h1>
+    <div class="login-container">
+        <h1># zipGear</h1>
 
-		<!-- Google Login Button -->
-		<button @click="loginWithGoogle">Login with Google</button>
+        <button @click="loginWithGoogle">Login with Google</button>
 
-		<!-- Email Login Section -->
-		<div>
-			<h3>Login with Email</h3>
-			<input type="email" placeholder="Email Address" v-model="email" />
-			<button @click="getValidationCode">Get Validation Code</button>
-		</div>
+        <form @submit.prevent="handleSubmit">
+            <div v-if="!showCodeInput">
+                <h3>Login with Email</h3>
+                <input 
+                    type="email" 
+                    placeholder="Email Address" 
+                    v-model="email" 
+                    :disabled="isLoading" 
+                    required 
+                />
+                <button type="submit" :disabled="isLoading">
+                    <span v-if="isLoading">Loading...</span>
+                    <span v-else>Get Validation Code</span>
+                </button>
+                <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+            </div>
 
-		<!-- Show response message -->
-		<p v-if="message">{{ message }}</p>
-	</div>
+            <div v-else>
+                <h3>Validation Code</h3>
+                <input 
+                    type="text" 
+                    placeholder="Validation Code" 
+                    v-model="validationCode" 
+                    required 
+                />
+                <button type="submit">Login</button>
+
+                <p>
+                    Didn’t receive a code?
+                    <a href="#" @click.prevent="resendCode">Resend Code</a>
+                </p>
+                <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+            </div>
+        </form>
+    </div>
 </template>
 
 <script>
 export default {
-	data() {
-		return {
-			email: '', // Store the user email
-			message: '', // Store any message from the backend
-		};
-	},
-	methods: {		
-		loginWithGoogle() {
-			console.log('Google Login clicked. We will implement later');
-			alert('Google Login is not implemented yet.');
-		},
+    data() {
+        return {
+            email: '',
+            validationCode: '',
+            showCodeInput: false,
+            isLoading: false,
+            errorMessage: '',
+        };
+    },
+    methods: {
+        loginWithGoogle() {
+            console.log('Google Login clicked');
+            // alert('Google Login is not implemented yet. Mock test');
+        },
 
-		// Call Backend API to Get Validation Code
-		async getValidationCode() {
-			if (!this.email) {
-				alert('Please enter a valid email address.');
-				return;
-			}
+        async handleSubmit() {
+            if (!this.showCodeInput) {
+                await this.getValidationCode();
+            } else {
+                await this.login();
+            }
+        },
 
-			try {
-				// Example: Call backend API (replace with your real API URL)
-				const response = await fetch('http://localhost:8080/api/send-code', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({ email: this.email }),
-				});
+        async getValidationCode() {
+            this.isLoading = true;
+            this.errorMessage = '';
+			
+            try {
+                const response = await fetch('http://localhost:8080/api/user/request-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: this.email }),
+                });
 
-				// Check if the response is OK
-				if (response.ok) {
-					const data = await response.json();
-					this.message = `Validation code sent to ${this.email}`;
-					console.log('Backend Response:', data);
-				} else {
-					this.message = 'Failed to send validation code.';
-					console.error('Error:', response.statusText);
-				}
-			} catch (error) {
-				this.message = 'Error connecting to the server.';
-				console.error('Network Error:', error);
-			}
-		},
-	},
+                if (response.ok) {
+                    this.showCodeInput = true;
+                    alert('Validation code sent! Check your email.');
+                } else {
+                    const data = await response.json();
+                    this.errorMessage = data.message || 'Failed to send validation code.';
+                }
+            } catch (error) {
+                console.error('Network Error:', error);
+                this.errorMessage = 'Network error. Please try again.';
+            } finally {
+                this.isLoading = false;
+            }
+        },
+
+        async login() {
+            this.errorMessage = '';
+            try {
+                const response = await fetch('http://localhost:8080/api/user/verify-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: this.validationCode, email: this.email }),
+                });
+
+                if (response.ok) {
+                    // alert('Login successful!');
+                    this.$router.push('/');
+                } else {
+                    const data = await response.json();
+                    this.errorMessage = data.message || 'Invalid validation code. Please try again.';
+                }
+            } catch (error) {
+                console.error('Network Error:', error);
+                this.errorMessage = 'Network error. Please try again.';
+            }
+        },
+
+        resendCode() {
+            console.log('Resending validation code...');
+            this.getValidationCode();
+        },
+    },
 };
 </script>
+
+<style scoped lang="scss">
+.login-container {
+    background-color: var(--surface-color);
+    padding: var(--padding-container);
+    border-radius: var(--border-radius);
+    max-width: var(--width-content);
+    margin: 0 auto;
+    text-align: center;
+}
+
+input {
+    margin-bottom: var(--spacing-element);
+}
+
+button {
+    position: relative;
+}
+
+button[disabled] {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.error {
+    color: var(--primary-color);
+    margin-top: var(--spacing-element);
+}
+</style>
