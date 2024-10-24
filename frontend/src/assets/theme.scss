@@ -1,0 +1,97 @@
+/* assets/styles/theme.scss */
+
+/* Colors */
+:root {
+	--primary-color: #C52828; /* Red for buttons and highlights */
+	--background-color: #F3F4F6; /* Light gray for page background */
+	--surface-color: #FFFFFF; /* White for containers and cards */
+	--text-color: #2C3E50; /* Dark gray for main text */
+	--light-text-color: #9CA3AF; /* Light gray for placeholders */
+	--border-color: #D1D5DB; /* Light border color */
+
+	/* Typography */
+	--font-family: 'Poppins', sans-serif; /* Similar to Lexend */
+	--font-size-title: 32px; /* For page titles and logos */
+	--font-size-subtitle: 20px; /* For section headers */
+	--font-size-button: 16px; /* Button text size */
+	--font-size-input: 14px; /* Input text size */
+	--font-weight-bold: 700; /* Bold for titles */
+	--font-weight-semi-bold: 600; /* Semi-bold for buttons */
+	--font-weight-regular: 400; /* Regular weight for body text */
+
+	/* Spacing */
+	--padding-container: 24px; /* Padding inside containers */
+	--padding-button: 12px 24px; /* Button padding */
+	--spacing-element: 16px; /* Spacing between form elements */
+	--border-radius: 6px; /* Border radius for buttons and inputs */
+
+	/* Dimensions */
+	--width-wide: 1200px; /* For wide content layouts */
+	--width-content: 800px; /* For main content area */
+	--width-side: 300px; /* For sidebars */
+
+	/* Button Hover State */
+	--hover-color: #B02121; /* Darker red for button hover */
+}
+
+/* General Styles */
+body {
+	font-family: var(--font-family);
+	background-color: var(--background-color);
+	color: var(--text-color);
+	margin: 0;
+	padding: 0;
+}
+
+/* Button Styles */
+button {
+	background-color: var(--primary-color);
+	color: var(--surface-color);
+	padding: var(--padding-button);
+	border: none;
+	border-radius: var(--border-radius);
+	font-size: var(--font-size-button);
+	font-weight: var(--font-weight-semi-bold);
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+}
+
+button:hover {
+	background-color: var(--hover-color);
+}
+
+/* Input Styles */
+input {
+	background-color: var(--surface-color);
+	border: 1px solid var(--border-color);
+	padding: 12px;
+	font-size: var(--font-size-input);
+	color: var(--text-color);
+	border-radius: var(--border-radius);
+	width: 100%;
+	box-sizing: border-box;
+}
+
+input::placeholder {
+	color: var(--light-text-color);
+}
+
+input:focus {
+	border-color: var(--primary-color);
+	outline: none;
+}
+
+/* Layout Width Classes */
+.content {
+	width: var(--width-content);
+	margin: 0 auto;
+}
+
+.wide {
+	width: var(--width-wide);
+	margin: 0 auto;
+}
+
+.sidebar {
+	width: var(--width-side);
+}
