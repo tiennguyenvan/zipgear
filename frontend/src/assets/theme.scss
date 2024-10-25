@@ -1,68 +1,150 @@
-/* assets/styles/theme.scss */
-
-/* Colors */
+/* ====== COLORS ====== */
 :root {
-	--primary-color: #C52828; /* Red for buttons and highlights */
-	--background-color: #F3F4F6; /* Light gray for page background */
-	--surface-color: #FFFFFF; /* White for containers and cards */
-	--text-color: #2C3E50; /* Dark gray for main text */
-	--light-text-color: #9CA3AF; /* Light gray for placeholders */
-	--border-color: #D1D5DB; /* Light border color */
+	--primary-color: #C21715;
+	--secondary-color: #d01a17;
+	--bg-color: #EAEAEE;
+	--light-bg-color: #F4F5F9;
+	--white-bg-color: #FFFFFF;
+	--text-color: #000000;
+	--light-text-color: #969696;
+	--border-color: #757474;
+	--success-color: #34A853;
 
-	/* Typography */
-	--font-family: 'Poppins', sans-serif; /* Similar to Lexend */
-	--font-size-title: 32px; /* For page titles and logos */
-	--font-size-subtitle: 20px; /* For section headers */
-	--font-size-button: 16px; /* Button text size */
-	--font-size-input: 14px; /* Input text size */
-	--font-weight-bold: 700; /* Bold for titles */
-	--font-weight-semi-bold: 600; /* Semi-bold for buttons */
-	--font-weight-regular: 400; /* Regular weight for body text */
+	/* ====== TYPOGRAPHY ====== */
+	--font-family: 'Poppins', sans-serif;
+	--font-size-title: 32px;
+	--font-size-subtitle: 24px;
+	--font-size-content: 16px;
+	--font-size-card: 14px;
+	--font-size-button: 16px;
+	--font-size-input: 14px;
+	--font-weight-title: 700;
+	--font-weight-button: 600;
 
-	/* Spacing */
-	--padding-container: 24px; /* Padding inside containers */
-	--padding-button: 12px 24px; /* Button padding */
-	--spacing-element: 16px; /* Spacing between form elements */
-	--border-radius: 6px; /* Border radius for buttons and inputs */
+	/* ====== SPACING ====== */	
+	--padding-container: 48px;
+	--padding-button: 12px 24px;
+	--spacing-element-small: 8px;
+	--spacing-element: 16px;
+	--spacing-element-big: 32px;
+	--spacing-element-large: 48px;
+	--border-radius: 6px;
 
-	/* Dimensions */
-	--width-wide: 1200px; /* For wide content layouts */
-	--width-content: 800px; /* For main content area */
-	--width-side: 300px; /* For sidebars */
-
-	/* Button Hover State */
-	--hover-color: #B02121; /* Darker red for button hover */
+	/* ====== DIMENSIONS ====== */
+	--width-wide: 1200px;
+	--width-content: 800px;
+	--width-side: 300px;
 }
 
-/* General Styles */
+/* ====== GENERAL STYLES ====== */
 body {
 	font-family: var(--font-family);
-	background-color: var(--background-color);
+	font-size: var(--font-size-content);
+	background-color: var(--bg-color);
 	color: var(--text-color);
 	margin: 0;
 	padding: 0;
 }
 
-/* Button Styles */
+h1 {
+	font-size: var(--font-size-title);
+}
+h2 {
+	font-size: var(--font-size-subtitle);
+}
+h3 {
+	font-size: var(--font-size-content);
+}
+h4 {
+	font-size: var(--font-size-card);
+}
+/* ====== LINK ====== */
+
+a {
+	color: var(--text-color);
+	text-decoration: none;
+
+	&:hover {
+		transform: scale(1.02);
+	}
+
+	&:active {
+		transform: scale(0.98);
+	}
+}
+a.action {
+	font-weight: normal;
+	font-size: var(--font-size-card);
+	color: var(--primary-color);
+	&:hover {
+		text-decoration: underline;
+	}
+}
+
+/* ====== BUTTON ====== */
 button {
-	background-color: var(--primary-color);
-	color: var(--surface-color);
+	background-color: var(--white-bg-color);
+	color: var(--primary-color);
 	padding: var(--padding-button);
-	border: none;
+	border: 1px solid var(--primary-color);
 	border-radius: var(--border-radius);
 	font-size: var(--font-size-button);
-	font-weight: var(--font-weight-semi-bold);
+	font-weight: var(--font-weight-button);
 	cursor: pointer;
-	transition: background-color 0.2s ease;
+
+	// transition: background-color 0.2s ease;
+	&:hover {
+		transform: scale(1.02);
+		/* Slight click effect */
+	}
+
+	&:active {
+		transform: scale(0.98);
+		/* Slight click effect */
+	}
 }
 
-button:hover {
-	background-color: var(--hover-color);
+.primary-btn {
+	background-color: var(--primary-color);
+	color: var(--white-bg-color);
+	border-color: transparent;
 }
 
-/* Input Styles */
+.primary-btn::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0);
+	/* Transparent initially */
+	transition: background-color 0.3s ease;
+	/* Smooth transition */
+}
+
+.primary-btn:hover::before {
+	background-color: rgba(0, 0, 0, 0.2);
+	/* Dark overlay on hover */
+}
+
+.disable-btn,
+.disable-btn:hover,
+.disable-btn:active {
+	background-color: var(--light-text-color);
+	color: var(--white-bg-color);
+	border-color: transparent;
+	cursor: not-allowed;
+	/* Cursor shows as disabled */
+	opacity: 0.6;
+	/* Slightly faded to indicate disabled state */
+	transform: none;
+	/* No click effect */
+}
+
+/* ====== INPUT STYLES ====== */
 input {
-	background-color: var(--surface-color);
+	background-color: var(--white-bg-color);
 	border: 1px solid var(--border-color);
 	padding: 12px;
 	font-size: var(--font-size-input);
@@ -81,7 +163,7 @@ input:focus {
 	outline: none;
 }
 
-/* Layout Width Classes */
+/* ====== LAYOUT WIDTH CLASSES ====== */
 .content {
 	width: var(--width-content);
 	margin: 0 auto;
@@ -94,4 +176,37 @@ input:focus {
 
 .sidebar {
 	width: var(--width-side);
+}
+
+/* ====== BORDER UTILITIES ====== */
+.border {
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+}
+.border-radius {
+	border-radius: var(--border-radius);
+}
+.no-border {
+	border: none;
+}
+
+/* ====== DESIGN SPECIALITY ====== */
+.card {
+	background-color: var(--white-bg-color);
+	border-radius: var(--border-radius);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	min-height: 1vh;
+	border: 1px solid transparent;
+	font-size: var(--font-size-card);
+}
+.dim-text {
+	font-size: var(--font-size-card);
+	color: var(--light-text-color);
+}
+.flex {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0;
+	margin: 0;
 }
