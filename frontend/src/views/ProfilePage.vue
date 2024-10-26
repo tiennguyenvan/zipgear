@@ -26,7 +26,7 @@
 				<h2>{{ email }}</h2>
 				<p class="dim-text">Joined {{ joinedDate }}</p>
 
-				<div class="address section">
+				<div class="addresses section">
 					<h3>
 						Address
 						<a class="action" href="#" @click.prevent="showAddressInput = !showAddressInput">
@@ -34,18 +34,20 @@
 						</a>
 					</h3>
 					<div v-if="showAddressInput" class="new-address">
-						<input v-model="newAddress" type="text" placeholder="Enter new address"
+						<input v-model="newAddress" type="text" placeholder="700 Royal Ave, New Westminster, BC"
 							@input="checkAddressEmpty" />
 					</div>
 					<ul v-if="addresses.length">
 						<li v-for="(address, index) in addresses" :key="index">
-							{{ address }} <a href="#" @click.prevent="removeAddress(index)">X</a>
+							{{ address }} <a href="#" class="action" title="delete" @click.prevent="removeAddress(address)">X</a>
 						</li>
 					</ul>
 				</div>
 
 				<!-- Update Profile Button -->
-				<button class="primary-btn" @click="updateProfile" :disabled="isUpdateProfileDisabled">Update Profile</button>
+				<button class="primary-btn update-profile-btn" @click="updateProfile" :disabled="isUpdateProfileDisabled">
+					{{ submitButtonText() }}
+				</button>
 			</div>
 		</div>
 	</div>
@@ -70,6 +72,7 @@ export default {
 			showAddressInput: false,
 			isAddressEmpty: true,
 			newAddress: '',
+			isUpdateProfileDisabled: true,
 
 			// Orders JSON data
 			orders: [
@@ -135,6 +138,9 @@ export default {
 		},
 		checkAddressEmpty() {
 			this.isAddressEmpty = this.newAddress.trim() === '';
+			if (!this.isAddressEmpty) {
+				this.isUpdateProfileDisabled = false;
+			}
 		},
 
 		addAddress() {
@@ -156,13 +162,15 @@ export default {
 				return;
 			}
 			this.addresses = this.addresses.filter(addr => addr !== addressToRemove); // Remove locally
-		},
-		isUpdateProfileDisabled() {
-			return true;
-			// if (this.isUpdateProfileDisabled) {
 
-			// }
-			// originalAddresses
+			this.isUpdateProfileDisabled = false;
+			console.log(this.addresses)
+			console.log('removeAddress', addressToRemove);
+		},
+
+		submitButtonText() {
+			// If there's input in newAddress, show "Add New Address"
+			return this.newAddress.trim() !== '' ? 'Add New Address' : 'Update Profile';
 		},
 		async updateProfile() {
 			this.originalAddresses = [...this.addresses];
@@ -183,8 +191,8 @@ export default {
 				);
 
 				if (!response.ok) throw new Error('Failed to update profile.');
-
-				alert('Profile updated successfully!');
+				this.originalAddresses = [...this.addresses]
+				this.newAddress = '';
 			} catch (error) {
 				console.error('Error updating profile:', error);
 				this.addresses = this.originalAddresses;
@@ -251,6 +259,7 @@ export default {
 				.address {
 					color: gray;
 					margin: 0;
+
 				}
 			}
 		}
@@ -259,6 +268,25 @@ export default {
 
 	.info {
 		padding: var(--padding-container);
+
+		.addresses {
+			ul {
+				padding: 0;				
+				li {
+					margin-top: var(--spacing-element-small);
+					display: flex;
+					align-items: center;
+					gap: 0.5em;					
+				}
+			}
+
+
+		}
+	}
+	
+	.update-profile-btn {
+		width: 100%;
+		margin-top: var(--spacing-element);
 	}
 }
 </style>
