@@ -39,15 +39,19 @@
 					</div>
 					<ul v-if="addresses.length">
 						<li v-for="(address, index) in addresses" :key="index">
-							{{ address }} <a href="#" class="action" title="delete" @click.prevent="removeAddress(address)">X</a>
+							{{ address }} <a href="#" class="action" title="delete"
+								@click.prevent="removeAddress(address)">X</a>
 						</li>
 					</ul>
 				</div>
 
 				<!-- Update Profile Button -->
-				<button class="primary-btn update-profile-btn" @click="updateProfile" :disabled="isUpdateProfileDisabled">
-					{{ submitButtonText() }}
+				<button class="primary-btn update-profile-btn" @click="updateProfile"
+					:disabled="isUpdateProfileDisabled">
+					{{ submitButtonText }}
 				</button>
+				
+				<p v-if="updateMessage.length > 0">{{ updateMessage }}</p>
 			</div>
 		</div>
 	</div>
@@ -72,7 +76,9 @@ export default {
 			showAddressInput: false,
 			isAddressEmpty: true,
 			newAddress: '',
+			updateMessage: '',
 			isUpdateProfileDisabled: true,
+			submitButtonText: 'Update Profile',
 
 			// Orders JSON data
 			orders: [
@@ -132,7 +138,7 @@ export default {
 				this.addresses = data.addresses;
 			} catch (error) {
 				console.error('Error fetching user data:', error);
-				alert('Session expired. Please log in again.');
+				alert('Session expired. Please log in again.' + error);
 				this.$router.push('/login');
 			}
 		},
@@ -141,40 +147,50 @@ export default {
 			if (!this.isAddressEmpty) {
 				this.isUpdateProfileDisabled = false;
 			}
+			if (!this.isAddressEmpty) {
+				this.submitButtonText = 'Add New Address';
+			}
+			this.updateMessage = '';
 		},
 
 		addAddress() {
-			if (this.isAddressEmpty) {
-				alert('Please enter a valid address.');
+			if (this.isAddressEmpty) {				
+				return;				
+			}
+			if (this.newAddress.trim() === '') {
 				return;
 			}
 			if (this.addresses.includes(this.newAddress.trim())) {
-				alert('Address already exists.');
+				this.updateMessage = 'Address already exists.';
+				this.isUpdateProfileDisabled = true;				
 				return;
 			}
 			this.addresses.push(this.newAddress.trim()); // Add locally
 			this.newAddress = ''; // Clear input
-			this.showAddressInput = false; // Hide input field
+			this.showAddressInput = false; // Hide input field			
 		},
 		removeAddress(addressToRemove) {
 			if (this.addresses.length <= 1) {
-				alert('You must have at least one address.');
+				this.updateMessage = 'You must have at least one address.';
 				return;
 			}
 			this.addresses = this.addresses.filter(addr => addr !== addressToRemove); // Remove locally
-
 			this.isUpdateProfileDisabled = false;
-			console.log(this.addresses)
-			console.log('removeAddress', addressToRemove);
+			this.updateMessage = '';
+			if (this.isAddressEmpty) {
+				this.submitButtonText = 'Update Profile';
+				return;
+			}
+			this.submitButtonText = 'Add Address and Update';
 		},
-
-		submitButtonText() {
-			// If there's input in newAddress, show "Add New Address"
-			return this.newAddress.trim() !== '' ? 'Add New Address' : 'Update Profile';
-		},
+		
 		async updateProfile() {
 			this.originalAddresses = [...this.addresses];
 			this.addAddress();
+			if (this.isUpdateProfileDisabled) {
+				return;
+			}
+
 			try {
 				const updatedUser = {
 					email: this.userEmail,
@@ -190,13 +206,19 @@ export default {
 					}
 				);
 
-				if (!response.ok) throw new Error('Failed to update profile.');
+				if (!response.ok) {
+					console.log(response);
+					throw new Error('Failed to update profile: ' + response.body);
+				}
+				console.log(response);
 				this.originalAddresses = [...this.addresses]
 				this.newAddress = '';
-			} catch (error) {
-				console.error('Error updating profile:', error);
+				this.isUpdateProfileDisabled = true;
+				this.updateMessage = 'Profile updated successfully.';
+				this.submitButtonText = 'Update Profile';
+			} catch (error) {				
 				this.addresses = this.originalAddresses;
-				alert('Failed to update profile.');
+				this.updateMessage = error;
 			}
 		},
 
@@ -271,19 +293,20 @@ export default {
 
 		.addresses {
 			ul {
-				padding: 0;				
+				padding: 0;
+
 				li {
 					margin-top: var(--spacing-element-small);
 					display: flex;
 					align-items: center;
-					gap: 0.5em;					
+					gap: 0.5em;
 				}
 			}
 
 
 		}
 	}
-	
+
 	.update-profile-btn {
 		width: 100%;
 		margin-top: var(--spacing-element);
