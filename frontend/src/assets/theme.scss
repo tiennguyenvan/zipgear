@@ -102,32 +102,21 @@ button {
 		transform: scale(0.98);
 		/* Slight click effect */
 	}
+	position: relative;
 }
 
 .primary-btn {
 	background-color: var(--primary-color);
 	color: var(--white-bg-color);
-	border-color: transparent;
+	border-color: transparent;	
+}
+.primary-btn:hover {
+	background-color: var(--secondary-color);
 }
 
-.primary-btn::before {
-	content: "";
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	background-color: rgba(0, 0, 0, 0);
-	/* Transparent initially */
-	transition: background-color 0.3s ease;
-	/* Smooth transition */
-}
-
-.primary-btn:hover::before {
-	background-color: rgba(0, 0, 0, 0.2);
-	/* Dark overlay on hover */
-}
-
+button[disabled],
+button[disabled]:hover,
+button[disabled]:active,
 .disable-btn,
 .disable-btn:hover,
 .disable-btn:active {

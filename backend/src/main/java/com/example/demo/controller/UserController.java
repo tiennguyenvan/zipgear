@@ -135,6 +135,61 @@ public class UserController {
 		return ResponseEntity.ok(responseData);
 	}
 
+	@PatchMapping("/update")
+	public ResponseEntity<String> updateUserProfile(@RequestParam String email, @RequestParam String code,
+			@RequestBody User userUpdates) {
+
+		// Validate session
+		String sessionCode = activeSessions.get(email);
+		if (sessionCode == null || !sessionCode.equals(code)) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Session expired. Please login again.");
+		}
+
+		String updateUserEmail = userUpdates.getEmail();
+		if (updateUserEmail == null || !updateUserEmail.equals(email)) {
+			return ResponseEntity.badRequest().body("Mismatching user email.");
+		}
+
+		// Retrieve user
+		User existingUser = userRepository.findByEmail(email);
+		if (existingUser == null) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+		}
+
+		// Update addresses if provided
+		List<String> newAddresses = userUpdates.getAddresses();
+		if (newAddresses == null || newAddresses.isEmpty()) {
+			return ResponseEntity.badRequest().body("Invalid update request");
+		}
+
+		for (String address : newAddresses) {
+			if (!Lib.isValidAddress(address)) {
+				return ResponseEntity.badRequest().body("Invalid address: " + address);
+			}
+		}
+
+		existingUser.setAddresses(newAddresses);
+
+		// Save updated user
+		userRepository.save(existingUser);
+		return ResponseEntity.ok("User profile updated successfully.");
+	}
+
+	/**
+	 * validateAddress() {
+	 * const addressParts = this.newAddress.trim().split(',');
+	 * const isValidFormat =
+	 * addressParts.length >= 3 &&
+	 * /\d+\s+\w+/.test(addressParts[0]) && // Block number + street
+	 * addressParts[1].trim().length >= 3 && // City name >= 3 chars
+	 * addressParts[2].trim().length === 2; // Province name = 2 chars
+	 * 
+	 * const isDuplicate = this.addresses.includes(this.newAddress.trim());
+	 * 
+	 * this.isAddressValid = isValidFormat && !isDuplicate;
+	 * },
+	 */
+
 	/**
 	 * Google login
 	 * Frontend redirects the user to Google’s OAuth Login Page.

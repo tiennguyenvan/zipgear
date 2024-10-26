@@ -27,16 +27,25 @@
 				<p class="dim-text">Joined {{ joinedDate }}</p>
 
 				<div class="address section">
-					<h3>Address <a class="action" href="#" @click.prevent="addAddress">+ New</a></h3>
-					<ul>
+					<h3>
+						Address
+						<a class="action" href="#" @click.prevent="showAddressInput = !showAddressInput">
+							+ New
+						</a>
+					</h3>
+					<div v-if="showAddressInput" class="new-address">
+						<input v-model="newAddress" type="text" placeholder="Enter new address"
+							@input="checkAddressEmpty" />
+					</div>
+					<ul v-if="addresses.length">
 						<li v-for="(address, index) in addresses" :key="index">
-							{{ address }} <a href="#" @click.prevent="removeAddress(index)">Disable</a>
+							{{ address }} <a href="#" @click.prevent="removeAddress(index)">X</a>
 						</li>
 					</ul>
 				</div>
 
 				<!-- Update Profile Button -->
-				<button class="disable-btn" @click="updateProfile">Update Profile</button>
+				<button class="primary-btn" @click="updateProfile" :disabled="isUpdateProfileDisabled">Update Profile</button>
 			</div>
 		</div>
 	</div>
@@ -55,8 +64,12 @@ export default {
 			email: '',
 			joinedDate: '',
 			addresses: [],
+			originalAddresses: [],
 			code: localStorage.getItem('code'),
 			userEmail: localStorage.getItem('email'),
+			showAddressInput: false,
+			isAddressEmpty: true,
+			newAddress: '',
 
 			// Orders JSON data
 			orders: [
@@ -120,15 +133,65 @@ export default {
 				this.$router.push('/login');
 			}
 		},
+		checkAddressEmpty() {
+			this.isAddressEmpty = this.newAddress.trim() === '';
+		},
+
 		addAddress() {
-			alert('Add Address functionality is not implemented yet.');
+			if (this.isAddressEmpty) {
+				alert('Please enter a valid address.');
+				return;
+			}
+			if (this.addresses.includes(this.newAddress.trim())) {
+				alert('Address already exists.');
+				return;
+			}
+			this.addresses.push(this.newAddress.trim()); // Add locally
+			this.newAddress = ''; // Clear input
+			this.showAddressInput = false; // Hide input field
 		},
-		removeAddress(index) {
-			this.addresses.splice(index, 1);
+		removeAddress(addressToRemove) {
+			if (this.addresses.length <= 1) {
+				alert('You must have at least one address.');
+				return;
+			}
+			this.addresses = this.addresses.filter(addr => addr !== addressToRemove); // Remove locally
 		},
-		updateProfile() {
-			alert('Update Profile functionality is not implemented yet.');
+		isUpdateProfileDisabled() {
+			return true;
+			// if (this.isUpdateProfileDisabled) {
+
+			// }
+			// originalAddresses
 		},
+		async updateProfile() {
+			this.originalAddresses = [...this.addresses];
+			this.addAddress();
+			try {
+				const updatedUser = {
+					email: this.userEmail,
+					addresses: this.addresses, // Use current addresses
+				};
+
+				const response = await fetch(
+					`http://localhost:8080/api/user/update?email=${this.userEmail}&code=${this.code}`, // Send email and code as query params
+					{
+						method: 'PATCH',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify(updatedUser),
+					}
+				);
+
+				if (!response.ok) throw new Error('Failed to update profile.');
+
+				alert('Profile updated successfully!');
+			} catch (error) {
+				console.error('Error updating profile:', error);
+				this.addresses = this.originalAddresses;
+				alert('Failed to update profile.');
+			}
+		},
+
 	},
 };
 </script>
@@ -138,9 +201,9 @@ export default {
 	align-items: start;
 
 	.orders {
-		background-color: var(--light-bg-color);		
-		flex-grow: 1;	
-		width: 0;	
+		background-color: var(--light-bg-color);
+		flex-grow: 1;
+		width: 0;
 		padding: var(--padding-container);
 
 		.item {
@@ -181,7 +244,7 @@ export default {
 					margin-bottom: 5px;
 
 					a.cancel {
-						margin-left: 5px;						
+						margin-left: 5px;
 					}
 				}
 
@@ -194,7 +257,7 @@ export default {
 
 	}
 
-	.info {		
+	.info {
 		padding: var(--padding-container);
 	}
 }
