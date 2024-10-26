@@ -6,12 +6,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 
 import com.example.demo.service.EmailService;
+import com.example.demo.service.Env;
 
 @SpringBootApplication
 public class DemoApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(DemoApplication.class, args);
+        SpringApplication.run(DemoApplication.class, args);	
     }
 
     // Use CommandLineRunner to test sending the email on startup

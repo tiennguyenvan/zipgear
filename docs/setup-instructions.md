@@ -22,7 +22,7 @@
       npm install
       npm run serve
       ```
-   3. The frontend will run on `http://localhost:8081`.
+   3. The frontend will run on `http://localhost:9999`.
 
 ## Making Changes Locally
 1. Create a new branch:
