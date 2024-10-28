@@ -25,7 +25,7 @@
 </template>
 
 <script>
-import Env from '@/Env';
+import Env from '@/utils/Env';
 import SiteLogo from './SiteLogo.vue';
 
 export default {
