@@ -1,14 +1,29 @@
 package com.example.demo.service;
 
+import java.security.SecureRandom;
+
 public class Lib {
+
 	public static String ValidationCode() {
-		// we will use this for testing purposes
-		return "123456";
+		if (Env.SKIP_SENDING_LOGIN_EMAIL) {
+			return "123456";
+		}
+		return ValidationCode(Env.VALIDATION_CODE_LENGTH);
 	}
 
+	private static final String CHARACTERS = 
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
+    private static final SecureRandom RANDOM = new SecureRandom();
+
 	public static String ValidationCode(int length) {
-		// please develop this with a real implementation
-		return "123456";
+		StringBuilder result = new StringBuilder(length);
+
+        for (int i = 0; i < length; i++) {
+            int index = RANDOM.nextInt(CHARACTERS.length());
+            result.append(CHARACTERS.charAt(index));
+        }
+
+        return result.toString();
 	}
 
 	public static boolean isValidAddress(String address) {

@@ -22,6 +22,7 @@
 	--font-weight-button: 600;
 
 	/* ====== SPACING ====== */	
+	--padding-container-small: 32px;
 	--padding-container: 48px;
 	--padding-button: 12px 24px;
 	--spacing-element-small: 8px;
@@ -105,12 +106,12 @@ button {
 	position: relative;
 }
 
-.primary-btn {
+.primary-btn, button[type="submit"] {
 	background-color: var(--primary-color);
 	color: var(--white-bg-color);
 	border-color: transparent;	
 }
-.primary-btn:hover {
+.primary-btn:hover, button[type="submit"]:hover {
 	background-color: var(--secondary-color);
 }
 

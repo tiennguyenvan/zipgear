@@ -10,6 +10,8 @@
 /mvn/
 mvnw
 mvnw.cmd
+.vscode
+vscode
 
 # Node.js / Vue.js ignores
 node_modules/
@@ -31,3 +33,4 @@ Thumbs.db
 .env.test.local
 .env.production.local
 .env.local
+

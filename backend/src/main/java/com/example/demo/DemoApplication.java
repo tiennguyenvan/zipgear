@@ -7,18 +7,21 @@ import org.springframework.context.annotation.Bean;
 
 import com.example.demo.service.EmailService;
 import com.example.demo.service.Env;
+import com.example.demo.service.Lib;
 
 @SpringBootApplication
 public class DemoApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(DemoApplication.class, args);	
+		// System.out.println(Lib.ValidationCode(Env.VALIDATION_CODE_LENGTH));		
     }
 
     // Use CommandLineRunner to test sending the email on startup
     @Bean
     public CommandLineRunner run(ApplicationContext ctx) {
         return args -> {
+			
             // EmailService emailService = ctx.getBean(EmailService.class);
 
             // try {

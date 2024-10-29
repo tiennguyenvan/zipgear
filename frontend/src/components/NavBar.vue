@@ -25,7 +25,7 @@
 </template>
 
 <script>
-import Env from '@/Env';
+import Env from '@/utils/Env';
 import SiteLogo from './SiteLogo.vue';
 
 export default {
@@ -66,10 +66,6 @@ export default {
 <style scoped lang="scss">
 .navbar {
 	align-items: stretch;
-
-	a {
-		padding-bottom: var(--spacing-element-small);
-	}
 
 	ul {
 		justify-content: start;

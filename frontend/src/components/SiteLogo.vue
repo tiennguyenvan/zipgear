@@ -16,6 +16,8 @@ export default {
 	font-family: var(--font-family);
 	font-size: var(--font-size-title);
 	font-weight: var(--font-weight-title);
+	justify-content: start;
+	padding-bottom: var(--spacing-element-small);
 }
 .hash {
 	color: var(--primary-color);

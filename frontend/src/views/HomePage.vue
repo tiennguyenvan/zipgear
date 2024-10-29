@@ -9,7 +9,7 @@
 
 <script>
 import NavBar from '@/components/NavBar.vue';
-import Env from '@/Env';
+import Env from '@/utils/Env';
 
 export default {
 	name: 'HomePage',
