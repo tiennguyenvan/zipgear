@@ -67,10 +67,6 @@ export default {
 .navbar {
 	align-items: stretch;
 
-	a {
-		padding-bottom: var(--spacing-element-small);
-	}
-
 	ul {
 		justify-content: start;
 		align-items: stretch;

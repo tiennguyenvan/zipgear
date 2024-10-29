@@ -1,10 +1,10 @@
 <template>
 	<div class="login-container">
-		<h1># zipGear</h1>
+		<SiteLogo />
 
 		<!-- <button @click="loginWithGoogle">Login with Google</button> -->
 
-		<form @submit.prevent="handleSubmit">
+		<form @submit.prevent="handleSubmit" class="card">
 			<div v-if="!showCodeInput">
 				<h3>Login with Email</h3>
 				<input type="email" placeholder="Email Address" v-model="email" :disabled="isLoading" required />
@@ -31,6 +31,8 @@
 </template>
 
 <script>
+import SiteLogo from '@/components/SiteLogo.vue';
+
 
 
 export default {
@@ -42,6 +44,9 @@ export default {
 			isLoading: false,
 			errorMessage: '',
 		};
+	},
+	components: {
+		SiteLogo
 	},
 	methods: {
 		// loginWithGoogle() {
@@ -118,12 +123,20 @@ export default {
 
 <style scoped lang="scss">
 .login-container {
-	background-color: var(--white-bg-color);
-	padding: var(--padding-container);
-	border-radius: var(--border-radius);
-	max-width: var(--width-content);
+	// background-color: var(--white-bg-color);
+	// padding: var(--padding-container);
+	// border-radius: var(--border-radius);
+	max-width: var(--width-side);
 	margin: 0 auto;
 	text-align: center;
+
+	form {
+		padding: var(--padding-container-small);
+		box-sizing: content-box;
+		h3 {
+			margin-top: 0;
+		}
+	}
 }
 
 input {

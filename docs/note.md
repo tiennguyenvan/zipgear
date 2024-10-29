@@ -15,3 +15,5 @@ ls -l .env
 * you will see something like this
 lrwxrwxrwx 1 user user 7 Oct 25 12:00 frontend/.env -> ../.env
 
+Do the same thing for backend. On backend, you only need:
+ln -s ../.env .env
