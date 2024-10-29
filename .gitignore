@@ -10,6 +10,8 @@
 /mvn/
 mvnw
 mvnw.cmd
+.vscode
+vscode
 
 # Node.js / Vue.js ignores
 node_modules/
@@ -20,3 +22,15 @@ yarn-error.log
 # OS-specific ignores
 .DS_Store
 Thumbs.db
+
+
+# dotenv environment variable files
+.env
+.env.development
+.env.production
+.env.development.local
+.env.test
+.env.test.local
+.env.production.local
+.env.local
+
