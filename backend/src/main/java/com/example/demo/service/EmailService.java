@@ -19,10 +19,11 @@ public class EmailService {
 
 	// temprorary disable for fast testing
     public void sendEmail(String to, String subject, String body) throws IOException {
-		if (Env.SKIP_SENDING_LOGIN_EMAIL) {
+		if (Env.SKIP_SENDING_LOGIN_EMAIL || Env.SENDGRID_API_KEY == "") {
 			return;
 		}
-        Email from = new Email("contact@sneeit.com");
+
+        Email from = new Email(Env.SENDGRID_FROM_EMAIL);
         Email recipient = new Email(to);
         Content content = new Content("text/plain", body);
         Mail mail = new Mail(from, subject, recipient, content);
