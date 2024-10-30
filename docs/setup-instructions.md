@@ -20,36 +20,47 @@
 	 VUE_APP_VALIDATION_CODE_LENGTH=8
 	 ```
 2. Link the file to backend:
+   1. MAC
 	  ```bash
       cd backend/
-	  ln -s ../.env .env
-      npm run serve
+	  ln -s ../.env .env      
       ```
+	2. Windows
+	  ```bash
+      cd backend/
+	  fsutil behavior set symlinkEvaluation R2R:1 R2L:1 L2R:1 L2L:1
+	  mklink .env ..\.env
+      ```
+
 3. Link the file to frontend:
+   1. MAC
 	  ```bash
       cd frontend/
-	  ln -s ../.env .env
-      npm run serve
+	  ln -s ../.env .env      
 	  ln -s ../.env .env.development.local
 	  ln -s ../.env .env.test.local
 	  ln -s ../.env .env.production.local
       ```
-4. Cd to the folder (backend or front-end), check the link .env
+	1. Windows
 	  ```bash
-      ls -l .env	  
+      cd frontend/
+	  fsutil behavior set symlinkEvaluation R2R:1 R2L:1 L2R:1 L2L:1
+	  ln -s ../.env .env      
+	  ln -s ../.env .env.development.local
+	  ln -s ../.env .env.test.local
+	  ln -s ../.env .env.production.local
       ```
-	  you will see something like this
-	  ```bash
-	  lrwxrwxrwx 1 user user 7 Oct 25 12:00 frontend/.env -> ../.env
-	  ```
+
 ## Start Backend and Frontend
 1. **Backend Setup:**
    1. Navigate to the `backend/` folder.
-   2. Open a terminal on Visual Studio Code and run:
+   2. Install 
+   3. Open a terminal on Visual Studio Code and run:
       ```bash
+
       mvn spring-boot:run
       ```
-   3. The backend server will run on `http://localhost:8080`.
+   4. The backend server will run on `http://localhost:8080`.
 
 2. **Frontend Setup:**
    1. Navigate to the `frontend/` folder.
