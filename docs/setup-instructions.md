@@ -11,7 +11,7 @@
    2. It is usually named as: `sprint-<number>`, ex: `sprint-01`.
 
 ## Setup Environment
-1. Create a file name **.env** in the root folder with the following details
+1. Click .env on the root folder with the following format
 	 ```env
 	 VUE_APP_SENDGRID_API_KEY=___SETUP_API_KEY_BY_YOURSELF___
 	 VUE_APP_SENDGRID_FROM_EMAIL=contact@sneeit.com
@@ -20,7 +20,6 @@
 	 VUE_APP_VALIDATION_CODE_LENGTH=8
 	 ```
 2. Link the file to backend:
-<<<<<<< Updated upstream
    1. MAC
 	  ```bash
       cd backend/
@@ -52,47 +51,6 @@
 	  ln -s ../.env .env.production.local
       ```
 
-=======
-   1. For macOS
-	   ```bash
-      cd backend/
-	   ln -s ../.env .env
-      npm run serve
-      ```
-   2. For Windows
-      ```bash
-      cd backend
-      mklink .env ..\.env
-      ```
-3. Link the file to frontend:
-   1. For macOS
-	   ```bash
-      cd frontend/
-	   ln -s ../.env .env
-      npm run serve
-	   ln -s ../.env .env.development.local
-	   ln -s ../.env .env.test.local
-	   ln -s ../.env .env.production.local
-      ```
-   2. For Windows
-      ```bash
-      cd frontend
-	   mklink .env ..\.env
-      npm run serve
-	   mklink .env.development.local ..\.env
-	   mklink .env.test.local ..\.env 
-	   mklink .env.production.local ..\.env
-      ```
-
-4. Cd to the folder (backend or front-end), check the link .env
-	   ```bash
-      ls -l .env	  
-      ```
-	  you will see something like this
-	   ```bash
-	   lrwxrwxrwx 1 user user 7 Oct 25 12:00 frontend/.env -> ../.env
-	   ```
->>>>>>> Stashed changes
 ## Start Backend and Frontend
 1. **Backend Setup:**
    1. Navigate to the `backend/` folder.
