@@ -51,10 +51,10 @@
    ```bash
     cd frontend/
    fsutil behavior set symlinkEvaluation R2R:1 R2L:1 L2R:1 L2L:1
-   ln -s ../.env .env
-   ln -s ../.env .env.development.local
-   ln -s ../.env .env.test.local
-   ln -s ../.env .env.production.local
+   mklink .env ..\.env
+   mklink .env.development.local ..\.env
+   mklink .env.test.local ..\.env
+   mklink .env.production.local ..\.env
    ```
 
 ## Start Backend and Frontend
