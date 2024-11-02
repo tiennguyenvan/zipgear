@@ -8,94 +8,105 @@ import java.time.LocalDateTime;
 @Table(name = "products")
 public class Product {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long productId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long productId;
 
-    @Column(nullable = false, length = 100)
-    private String name;
+	@Column(nullable = false, length = 100)
+	private String name;
 
-    @Column(length = 500)
-    private String description;
+	@Column(length = 500)
+	private String description;
 
-    @Column(nullable = false)
-    private BigDecimal price;
+	@Column(nullable = false)
+	private BigDecimal price;
 
-    @Column(name = "image_url", length = 255)
-    private String imageUrl; 
+	@Column(name = "image_url", length = 255)
+	private String imageUrl;
 
-    @Column(nullable = false, length = 50)
-    private String category;
+	@Column(nullable = false, length = 50)
+	private String category;
 
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+	@Column(nullable = false, updatable = false)
+	private LocalDateTime createdAt;
 
-    // Constructors
-    public Product() {
-        this.createdAt = LocalDateTime.now();  // Set createdAt at object creation
-    }
+	@Column(nullable = true)
+	private Double rating;
 
-    public Product(String name, String description, BigDecimal price, String imageUrl, String category) {
-        this.name = name;
-        this.description = description;
-        this.price = price;
-        this.imageUrl = imageUrl;
-        this.category = category;
-        this.createdAt = LocalDateTime.now();
-    }
+	// Constructors
+	public Product() {
+		this.createdAt = LocalDateTime.now(); // Set createdAt at object creation
+	}
 
-    // Getters and setters
+	public Product(String name, String description, BigDecimal price, String imageUrl, String category) {
+		this.name = name;
+		this.description = description;
+		this.price = price;
+		this.imageUrl = imageUrl;
+		this.category = category;
+		this.createdAt = LocalDateTime.now();
+	}
 
-    public Long getProductId() {
-        return productId;
-    }
+	// Getters and setters
 
-    public void setProductId(Long productId) {
-        this.productId = productId;
-    }
+	public Long getProductId() {
+		return productId;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public void setProductId(Long productId) {
+		this.productId = productId;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public String getDescription() {
-        return description;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+	public String getDescription() {
+		return description;
+	}
 
-    public BigDecimal getPrice() {
-        return price;
-    }
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
+	public BigDecimal getPrice() {
+		return price;
+	}
 
-    public String getImage() {
-        return imageUrl;
-    }
+	public void setPrice(BigDecimal price) {
+		this.price = price;
+	}
 
-    public void setImage(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
+	public String getImage() {
+		return imageUrl;
+	}
 
-    public String getCategory() {
-        return category;
-    }
+	public void setImage(String imageUrl) {
+		this.imageUrl = imageUrl;
+	}
 
-    public void setCategory(String category) {
-        this.category = category;
-    }
+	public String getCategory() {
+		return category;
+	}
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
+	public void setCategory(String category) {
+		this.category = category;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public Double getRating() {
+		return rating;
+	}
+
+	public void setRating(Double rating) {
+		this.rating = rating;
+	}
 
 }
