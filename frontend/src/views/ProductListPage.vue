@@ -35,7 +35,7 @@ export default {
   },
   methods: {
     fetchProducts() {
-      axios.get('/api/products')
+      axios.get('/api/product')
         .then(response => {
           this.products = response.data;
         })
@@ -50,7 +50,7 @@ export default {
       this.$router.push({ name: 'ProductFormPage', params: { id: productId } });
     },
     deleteProduct(productId) {
-      axios.delete(`/api/products/${productId}`)
+      axios.delete(`/api/product/${productId}`)
         .then(() => {
           this.fetchProducts();
         })
