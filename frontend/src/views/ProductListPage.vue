@@ -1,11 +1,24 @@
 <template>
   <div class="product-list">
     <h1>Product Management</h1>
+    <div class="filters">
+      <input v-model="keyword" placeholder="Search by keyword" @input="fetchProducts" />
+      <select v-model="priceOrder" @change="fetchProducts">
+        <option value="">Sort by Price</option>
+        <option value="asc">Price: Low to High</option>
+        <option value="desc">Price: High to Low</option>
+      </select>
+      <select v-model="ratingOrder" @change="fetchProducts">
+        <option value="">Sort by Rating</option>
+        <option value="asc">Rating: Low to High</option>
+        <option value="desc">Rating: High to Low</option>
+      </select>
+    </div>
     <button @click="navigateToCreate">Add New Product</button>
     <table>
       <thead>
         <tr>
-          <th>Product Name</th>
+          <th>Name</th>
           <th>Price</th>
           <th>Actions</th>
         </tr>
@@ -31,11 +44,20 @@ export default {
   data() {
     return {
       products: [],
+      keyword: '',
+      priceOrder: '',
+      ratingOrder: '',
     };
   },
   methods: {
     fetchProducts() {
-      axios.get('/api/product')
+      axios.get('/api/product/get-all', {
+        params: {
+          keyword: this.keyword,
+          priceOrder: this.priceOrder,
+          ratingOrder: this.ratingOrder,
+        },
+      })
         .then(response => {
           this.products = response.data;
         })
@@ -44,13 +66,13 @@ export default {
         });
     },
     navigateToCreate() {
-      this.$router.push({ name: 'ProductFormPage' });
+      this.$router.push({ name: 'productCreate' });
     },
     editProduct(productId) {
-      this.$router.push({ name: 'ProductFormPage', params: { id: productId } });
+      this.$router.push({ name: 'productEdit', params: { id: productId } });
     },
     deleteProduct(productId) {
-      axios.delete(`/api/product/${productId}`)
+      axios.delete(`/api/product/delete/${productId}`)
         .then(() => {
           this.fetchProducts();
         })
@@ -66,5 +88,6 @@ export default {
 </script>
 
 <style scoped>
-/* Basic styling */
+/* Add styling as needed */
 </style>
+
