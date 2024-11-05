@@ -11,6 +11,12 @@
       <label for="description">Description:</label>
       <textarea v-model="product.description"></textarea>
 
+      <label for="category">Category:</label>
+      <input type="text" v-model="product.category" required />
+
+      <label for="image">Image URL:</label>
+      <input type="text" v-model="product.image" required />
+
       <button type="submit">{{ isEditMode ? 'Update Product' : 'Create Product' }}</button>
     </form>
   </div>
@@ -26,13 +32,15 @@ export default {
         name: '',
         price: '',
         description: '',
+        category: '',
+        image: '',
       },
       isEditMode: false,
     };
   },
   methods: {
     fetchProduct(id) {
-      axios.get(`/api/products/${id}`)
+      axios.get(`/api/product/get/${id}`)
         .then(response => {
           this.product = response.data;
         })
@@ -41,23 +49,16 @@ export default {
         });
     },
     submitForm() {
-      if (this.isEditMode) {
-        axios.put(`/api/products/${this.product.id}`, this.product)
-          .then(() => {
-            this.$router.push({ name: 'ProductListPage' });
-          })
-          .catch(error => {
-            console.error('Error updating product:', error);
-          });
-      } else {
-        axios.post('/api/products', this.product)
-          .then(() => {
-            this.$router.push({ name: 'ProductListPage' });
-          })
-          .catch(error => {
-            console.error('Error creating product:', error);
-          });
-      }
+      const url = this.isEditMode ? `/api/product/edit/${this.product.id}` : '/api/product/create';
+      const method = this.isEditMode ? 'put' : 'post';
+
+      axios({ method, url, data: this.product })
+        .then(() => {
+          this.$router.push({ name: 'productList' });
+        })
+        .catch(error => {
+          console.error('Error submitting product:', error);
+        });
     },
   },
   created() {
@@ -70,5 +71,5 @@ export default {
 </script>
 
 <style scoped>
-/* Basic styling */
+/* Add styling as needed */
 </style>
