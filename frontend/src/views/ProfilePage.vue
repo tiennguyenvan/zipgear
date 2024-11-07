@@ -5,7 +5,7 @@
 		<!-- Profile Card -->
 		<div class="card user-profile flex">
 			<!-- Orders Section -->
-			<div class="orders">
+			<div class="orders main">
 				<h2>Orders</h2>
 
 				<!-- Loop through orders using v-for -->
@@ -231,10 +231,6 @@ export default {
 	align-items: start;
 
 	.orders {
-		background-color: var(--light-bg-color);
-		flex-grow: 1;
-		width: 0;
-		padding: var(--padding-container);
 
 		.item {
 			display: flex;

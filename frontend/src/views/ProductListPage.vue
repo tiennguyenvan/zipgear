@@ -38,53 +38,53 @@
 </template>
 
 <script>
-import axios from 'axios';
+// import axios from 'axios';
 
-export default {
-  data() {
-    return {
-      products: [],
-      keyword: '',
-      priceOrder: '',
-      ratingOrder: '',
-    };
-  },
-  methods: {
-    fetchProducts() {
-      axios.get('/api/product/get-all', {
-        params: {
-          keyword: this.keyword,
-          priceOrder: this.priceOrder,
-          ratingOrder: this.ratingOrder,
-        },
-      })
-        .then(response => {
-          this.products = response.data;
-        })
-        .catch(error => {
-          console.error('Error fetching products:', error);
-        });
-    },
-    navigateToCreate() {
-      this.$router.push({ name: 'productCreate' });
-    },
-    editProduct(productId) {
-      this.$router.push({ name: 'productEdit', params: { id: productId } });
-    },
-    deleteProduct(productId) {
-      axios.delete(`/api/product/delete/${productId}`)
-        .then(() => {
-          this.fetchProducts();
-        })
-        .catch(error => {
-          console.error('Error deleting product:', error);
-        });
-    },
-  },
-  mounted() {
-    this.fetchProducts();
-  },
-};
+// export default {
+//   data() {
+//     return {
+//       products: [],
+//       keyword: '',
+//       priceOrder: '',
+//       ratingOrder: '',
+//     };
+//   },
+//   methods: {
+//     fetchProducts() {
+//       axios.get('/api/product/get-all', {
+//         params: {
+//           keyword: this.keyword,
+//           priceOrder: this.priceOrder,
+//           ratingOrder: this.ratingOrder,
+//         },
+//       })
+//         .then(response => {
+//           this.products = response.data;
+//         })
+//         .catch(error => {
+//           console.error('Error fetching products:', error);
+//         });
+//     },
+//     navigateToCreate() {
+//       this.$router.push({ name: 'productCreate' });
+//     },
+//     editProduct(productId) {
+//       this.$router.push({ name: 'productEdit', params: { id: productId } });
+//     },
+//     deleteProduct(productId) {
+//       axios.delete(`/api/product/delete/${productId}`)
+//         .then(() => {
+//           this.fetchProducts();
+//         })
+//         .catch(error => {
+//           console.error('Error deleting product:', error);
+//         });
+//     },
+//   },
+//   mounted() {
+//     this.fetchProducts();
+//   },
+// };
 </script>
 
 <style scoped>

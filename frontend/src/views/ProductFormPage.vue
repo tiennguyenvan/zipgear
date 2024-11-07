@@ -23,51 +23,51 @@
 </template>
 
 <script>
-import axios from 'axios';
+// import axios from 'axios';
 
-export default {
-  data() {
-    return {
-      product: {
-        name: '',
-        price: '',
-        description: '',
-        category: '',
-        image: '',
-      },
-      isEditMode: false,
-    };
-  },
-  methods: {
-    fetchProduct(id) {
-      axios.get(`/api/product/get/${id}`)
-        .then(response => {
-          this.product = response.data;
-        })
-        .catch(error => {
-          console.error('Error fetching product:', error);
-        });
-    },
-    submitForm() {
-      const url = this.isEditMode ? `/api/product/edit/${this.product.id}` : '/api/product/create';
-      const method = this.isEditMode ? 'put' : 'post';
+// export default {
+//   data() {
+//     return {
+//       product: {
+//         name: '',
+//         price: '',
+//         description: '',
+//         category: '',
+//         image: '',
+//       },
+//       isEditMode: false,
+//     };
+//   },
+//   methods: {
+//     fetchProduct(id) {
+//       axios.get(`/api/product/get/${id}`)
+//         .then(response => {
+//           this.product = response.data;
+//         })
+//         .catch(error => {
+//           console.error('Error fetching product:', error);
+//         });
+//     },
+//     submitForm() {
+//       const url = this.isEditMode ? `/api/product/edit/${this.product.id}` : '/api/product/create';
+//       const method = this.isEditMode ? 'put' : 'post';
 
-      axios({ method, url, data: this.product })
-        .then(() => {
-          this.$router.push({ name: 'productList' });
-        })
-        .catch(error => {
-          console.error('Error submitting product:', error);
-        });
-    },
-  },
-  created() {
-    if (this.$route.params.id) {
-      this.isEditMode = true;
-      this.fetchProduct(this.$route.params.id);
-    }
-  },
-};
+//       axios({ method, url, data: this.product })
+//         .then(() => {
+//           this.$router.push({ name: 'productList' });
+//         })
+//         .catch(error => {
+//           console.error('Error submitting product:', error);
+//         });
+//     },
+//   },
+//   created() {
+//     if (this.$route.params.id) {
+//       this.isEditMode = true;
+//       this.fetchProduct(this.$route.params.id);
+//     }
+//   },
+// };
 </script>
 
 <style scoped>

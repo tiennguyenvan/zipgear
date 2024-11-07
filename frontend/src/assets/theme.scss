@@ -164,8 +164,15 @@ input:focus {
 	margin: 0 auto;
 }
 
+.main {
+	background-color: var(--light-bg-color);
+	flex-grow: 1;
+	width: 0;
+	padding: var(--padding-container);
+}
 .sidebar {
 	width: var(--width-side);
+	padding: var(--padding-container);
 }
 
 /* ====== BORDER UTILITIES ====== */

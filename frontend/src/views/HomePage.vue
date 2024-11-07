@@ -1,11 +1,20 @@
 <template>
 	<div class="wide">
 		<NavBar />
-		<div class="card home">
-			{{ adminEmail }}
+
+		<div class="card user-profile flex">			
+			<div class="products">
+				<h2>Place products here please</h2>							
+			</div>
+			
+			<div class="info sidebar">
+				<h2>Please search filer here please</h2>
+				<p>For Admin, this sidebar will become the edit/add-new form if needed</p>
+			</div>
 		</div>
 	</div>
 </template>
+
 
 <script>
 import NavBar from '@/components/NavBar.vue';
