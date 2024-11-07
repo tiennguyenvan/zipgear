@@ -1,0 +1,20 @@
+.wide {
+	width: 80%;
+	margin: 0 auto;
+}
+
+a.action {
+	color: #0073e6;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+button.primary-btn {
+	background-color: #0073e6;
+	color: white;
+	border: none;
+	padding: 10px 20px;
+	cursor: pointer;
+	border-radius: 4px;
+	font-size: 1em;
+}
