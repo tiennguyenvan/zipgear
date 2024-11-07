@@ -1,10 +1,9 @@
 <template>
 	<div class="wide">
 		<NavBar />
+		
+		<div class="card user-profile flex wrapper">
 
-		<!-- Profile Card -->
-		<div class="card user-profile flex">
-			<!-- Orders Section -->
 			<div class="orders main">
 				<h2>Orders</h2>
 
@@ -20,8 +19,7 @@
 					</div>
 				</div>
 			</div>
-
-			<!-- Sidebar Info -->
+			
 			<div class="info sidebar">
 				<h2>{{ email }}</h2>
 				<p class="dim-text">Joined {{ joinedDate }}</p>
@@ -45,7 +43,6 @@
 					</ul>
 				</div>
 
-				<!-- Update Profile Button -->
 				<button class="primary-btn update-profile-btn" @click="updateProfile"
 					:disabled="isUpdateProfileDisabled">
 					{{ submitButtonText }}
@@ -284,8 +281,7 @@ export default {
 
 	}
 
-	.info {
-		padding: var(--padding-container);
+	.info {		
 
 		.addresses {
 			ul {

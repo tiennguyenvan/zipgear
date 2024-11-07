@@ -2,8 +2,8 @@
 	<div class="wide">
 		<NavBar />
 
-		<div class="card user-profile flex">			
-			<div class="products">
+		<div class="card user-profile flex wrapper">
+			<div class="products main">
 				<h2>Place products here please</h2>							
 			</div>
 			
