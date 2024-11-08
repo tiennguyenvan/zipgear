@@ -3,7 +3,13 @@
 		<NavBar />
 
 		<div class="card user-profile flex wrapper">
-			<ProductList/>
+			<div class="products main">				
+				<ProductListItem/>
+				<ProductListItem/>
+				<ProductListItem/>
+				<ProductListItem/>
+				<ProductListItem/>
+			</div>
 			
 			<div class="info sidebar">
 				<h2>Please search filer here please</h2>
@@ -16,14 +22,14 @@
 
 <script>
 import NavBar from '@/components/NavBar.vue';
-import ProductList from '@/components/ProductList.vue';
+import ProductListItem from '@/components/ProductListItem.vue';
 import Env from '@/utils/Env';
 
 export default {
 	name: 'ProductListPage',
 	components: {
 		NavBar,
-		ProductList,
+		ProductListItem,
 	},
 	data() {
 		return {
