@@ -1,9 +1,15 @@
 package com.example.demo.service;
 
 import java.security.SecureRandom;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Lib {
-
+	public static Map<String, String> ResponseMessage(String message) {
+		Map<String, String> response = new HashMap<>();
+        response.put("message", message);
+        return response;
+	}
 	public static String ValidationCode() {		
 		if (Env.SKIP_SENDING_LOGIN_EMAIL) {
 			return "123456";

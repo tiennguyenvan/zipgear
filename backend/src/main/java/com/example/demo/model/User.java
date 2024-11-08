@@ -15,9 +15,11 @@ public class User {
 	@Column(nullable = false, unique = true) // Email should be unique
 	private String email;
 
-	@ElementCollection // Embeds the list of addresses in a separate join table
+	// Embeds the list of addresses in a separate join table
+	// we have to do this because the address could have the "," commas
+	@ElementCollection 
 	@CollectionTable(name = "user_addresses", joinColumns = @JoinColumn(name = "user_id"))
-	@Column(name = "address")
+	@Column(name = "addresses")
 	private List<String> addresses;
 
 	@Column(nullable = false, updatable = false)
@@ -32,13 +34,13 @@ public class User {
 		this.createdAt = LocalDateTime.now();
 		this.updatedAt = LocalDateTime.now();
 	}
-	
+
 	public User(String email, List<String> addresses) {
-        this.email = email;
-        this.addresses = addresses;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
+		this.email = email;
+		this.addresses = addresses;
+		this.createdAt = LocalDateTime.now();
+		this.updatedAt = LocalDateTime.now();
+	}
 
 	// Getters and Setters
 	public Long getUserId() {
@@ -80,10 +82,11 @@ public class User {
 	public void setUpdatedAt(LocalDateTime updatedAt) {
 		this.updatedAt = updatedAt;
 	}
-	
+
 	// Method triggered before an update
 	@PreUpdate
 	protected void onUpdate() {
-		this.updatedAt = LocalDateTime.now(); // Update timestamp automatically before saving changes
+		// Update timestamp automatically before saving changes
+		this.updatedAt = LocalDateTime.now();
 	}
 }

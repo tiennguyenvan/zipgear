@@ -75,7 +75,7 @@ export default {
 
 				if (response.ok) {
 					this.showCodeInput = true;
-					alert('Validation code sent! Check your email.');
+					// alert('Validation code sent! Check your email.');
 				} else {
 					const data = await response.json();
 					this.errorMessage = data.message || 'Failed to send validation code.';
