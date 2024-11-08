@@ -3,9 +3,7 @@
 		<NavBar />
 
 		<div class="card user-profile flex wrapper">
-			<div class="products main">
-				<h2>Place products here please</h2>							
-			</div>
+			<ProductList/>
 			
 			<div class="info sidebar">
 				<h2>Please search filer here please</h2>
@@ -18,12 +16,14 @@
 
 <script>
 import NavBar from '@/components/NavBar.vue';
+import ProductList from '@/components/ProductList.vue';
 import Env from '@/utils/Env';
 
 export default {
-	name: 'HomePage',
+	name: 'ProductListPage',
 	components: {
 		NavBar,
+		ProductList,
 	},
 	data() {
 		return {
