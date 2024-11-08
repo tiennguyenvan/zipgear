@@ -4,11 +4,7 @@
 
 		<div class="card user-profile flex wrapper">
 			<div class="products main">				
-				<ProductListItem/>
-				<ProductListItem/>
-				<ProductListItem/>
-				<ProductListItem/>
-				<ProductListItem/>
+				<!--your product loop here using the dummy data from the data() script-->
 			</div>
 			
 			<div class="info sidebar">
@@ -22,18 +18,25 @@
 
 <script>
 import NavBar from '@/components/NavBar.vue';
-import ProductListItem from '@/components/ProductListItem.vue';
 import Env from '@/utils/Env';
 
 export default {
 	name: 'ProductListPage',
 	components: {
-		NavBar,
-		ProductListItem,
+		NavBar,		
 	},
 	data() {
 		return {
 			adminEmail: Env.ADMIN_EMAIL,
+			// Orders JSON data
+			products: [
+			{
+					title: '____',
+					price: '$1,299.99',
+					rating: '4.2',
+					images: [],					
+				},
+			],
 		};
 	},
 	mounted() {
