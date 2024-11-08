@@ -28,7 +28,7 @@ export default {
 	data() {
 		return {
 			adminEmail: Env.ADMIN_EMAIL,
-			// Orders JSON data
+			// Products JSON data
 			products: [
 			{
 					title: '____',
