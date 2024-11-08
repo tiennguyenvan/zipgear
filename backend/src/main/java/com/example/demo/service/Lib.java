@@ -4,7 +4,7 @@ import java.security.SecureRandom;
 
 public class Lib {
 
-	public static String ValidationCode() {
+	public static String ValidationCode() {		
 		if (Env.SKIP_SENDING_LOGIN_EMAIL) {
 			return "123456";
 		}

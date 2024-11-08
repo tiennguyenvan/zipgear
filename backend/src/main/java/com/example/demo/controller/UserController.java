@@ -28,6 +28,7 @@ public class UserController {
 	private final Map<String, String> validationCodes = new ConcurrentHashMap<>();
 	private final Map<String, String> activeSessions = new ConcurrentHashMap<>();
 
+	// POST api/user/request-code
 	@PostMapping("/request-code")
 	public ResponseEntity<String> requestValidationCode(@RequestBody Map<String, String> request) {
 		String email = request.get("email");
@@ -37,6 +38,7 @@ public class UserController {
 
 		// Generate validation code
 		String code = Lib.ValidationCode();
+		System.out.println("Generated code: " + code);
 		validationCodes.put(email, code);
 
 		// Send the code via email
@@ -65,6 +67,7 @@ public class UserController {
 
 		// Check if the code matches
 		String storedCode = validationCodes.get(email);
+		System.out.println("storedCode: " + storedCode);
 		if (storedCode != null && storedCode.equals(code)) {
 			validationCodes.remove(email); // Remove the code after successful verification
 

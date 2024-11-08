@@ -135,8 +135,8 @@ export default {
 				this.addresses = data.addresses;
 			} catch (error) {
 				console.error('Error fetching user data:', error);
-				// alert('Session expired. Please log in again.' + error);
-				// this.$router.push('/login');
+				alert('Session expired. Please log in again.' + error);
+				this.$router.push('/login');
 			}
 		},
 		checkAddressEmpty() {

@@ -8,14 +8,20 @@ import org.springframework.context.annotation.Bean;
 import com.example.demo.service.EmailService;
 import com.example.demo.service.Env;
 import com.example.demo.service.Lib;
+import io.github.cdimascio.dotenv.Dotenv;
 
 @SpringBootApplication
 public class DemoApplication {
-
+	private static final Dotenv dotenv = Dotenv.load();	
     public static void main(String[] args) {
-        SpringApplication.run(DemoApplication.class, args);	
-		// System.out.println(Lib.ValidationCode(Env.VALIDATION_CODE_LENGTH));		
+        // SpringApplication.run(DemoApplication.class, args);	
+		// System.out.println("SKIP_SENDING_LOGIN_EMAIL" + Boolean.parseBoolean("true"));
+		// System.out.println(Env.SKIP_SENDING_LOGIN_EMAIL);
+		// System.out.println(dotenv.get("VUE_APP_SKIP_SENDING_LOGIN_EMAIL"));		
+		// System.out.println(dotenv.get("VUE_APP_VALIDATION_CODE_LENGTH"));		
     }
+
+
 
     // Use CommandLineRunner to test sending the email on startup
     @Bean
