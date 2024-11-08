@@ -19,7 +19,7 @@ public class EmailService {
 
 	// temprorary disable for fast testing
     public void sendEmail(String to, String subject, String body) throws IOException {
-		if (Env.SKIP_SENDING_LOGIN_EMAIL || Env.SENDGRID_API_KEY == "") {
+		if (Env.IS_DEVELOPING || Env.SENDGRID_API_KEY == "") {
 			return;
 		}		
 

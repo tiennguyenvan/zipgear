@@ -17,7 +17,7 @@ public class User {
 
 	// Embeds the list of addresses in a separate join table
 	// we have to do this because the address could have the "," commas
-	@ElementCollection 
+	@ElementCollection
 	@CollectionTable(name = "user_addresses", joinColumns = @JoinColumn(name = "user_id"))
 	@Column(name = "addresses")
 	private List<String> addresses;
@@ -27,6 +27,13 @@ public class User {
 
 	@Column(nullable = false)
 	private LocalDateTime updatedAt;
+
+	// Method triggered before an update
+	@PreUpdate
+	protected void onUpdate() {
+		// Update timestamp automatically before saving changes
+		this.updatedAt = LocalDateTime.now();
+	}
 
 	// Constructors
 	public User() {
@@ -83,10 +90,4 @@ public class User {
 		this.updatedAt = updatedAt;
 	}
 
-	// Method triggered before an update
-	@PreUpdate
-	protected void onUpdate() {
-		// Update timestamp automatically before saving changes
-		this.updatedAt = LocalDateTime.now();
-	}
 }

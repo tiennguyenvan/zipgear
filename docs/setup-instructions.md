@@ -18,7 +18,7 @@
    VUE_APP_SENDGRID_API_KEY=___SETUP_API_KEY_BY_YOURSELF___
    VUE_APP_SENDGRID_FROM_EMAIL=contact@sneeit.com
    VUE_APP_ADMIN_EMAIL=nguyentien.jobs@gmail.com
-   VUE_APP_SKIP_SENDING_LOGIN_EMAIL=true
+   VUE_APP_IS_DEVELOPING=true
    VUE_APP_VALIDATION_CODE_LENGTH=8
    ```
 2. Link the file to backend:
