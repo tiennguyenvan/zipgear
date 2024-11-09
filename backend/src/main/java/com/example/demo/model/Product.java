@@ -32,7 +32,7 @@ public class Product {
     @Column(name = "average_rating")
     private Double averageRating;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id", nullable = false)
 	@JsonIgnore
     private Category category;

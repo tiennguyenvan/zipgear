@@ -76,7 +76,7 @@ public class DemoApplication {
             // Add products to the category
             laptopCategory.addProduct(laptop1);
             laptopCategory.addProduct(laptop2);
-            // laptopCategory.addProduct(laptop3);
+            laptopCategory.addProduct(laptop3);
 
             // Category: Mobile
             Category mobileCategory = new Category();
@@ -149,8 +149,8 @@ public class DemoApplication {
 
             // Save each category individually
             categoryRepository.save(laptopCategory);
-            // categoryRepository.save(mobileCategory);
-            // categoryRepository.save(headphoneCategory);
+            categoryRepository.save(mobileCategory);
+            categoryRepository.save(headphoneCategory);
         };
     }
 }

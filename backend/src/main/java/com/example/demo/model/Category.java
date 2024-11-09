@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "categories")
 public class Category {
@@ -22,7 +24,8 @@ public class Category {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)	
+	@JsonIgnore
     private List<Product> products = new ArrayList<>();
 	
     public Category() {
@@ -53,7 +56,6 @@ public class Category {
     public void setProducts(List<Product> products) {
         this.products = products;
     }
-
 
 	public Long getCategoryId() {
 		return categoryId;
