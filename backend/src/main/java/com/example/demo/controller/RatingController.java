@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
-import com.zipgear.entity.Rating;
-import com.zipgear.repository.RatingRepository;
+import com.example.demo.model.Rating;
+import com.example.demo.repository.RatingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
