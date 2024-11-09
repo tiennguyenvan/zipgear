@@ -42,8 +42,9 @@ public class UserController {
 
 		// Generate validation code
 		String code = Lib.ValidationCode();
-		System.out.println("Generated code: " + code);
-		validationCodes.put(email, code);
+		// System.out.println("Generated code: " + code);
+		// validationCodes.put(email, code);
+		Lib.storeValidationCode(email, code);
 
 		// Send the code via email
 		try {
@@ -78,10 +79,8 @@ public class UserController {
 		}
 
 		// System.out.println("storedCode: " + storedCode);
-		validationCodes.remove(email); // Remove the code after successful verification
-
-		// Store the code as a session (email -> code)
-		activeSessions.put(email, code);
+		Lib.removeValidationCode(email);
+		Lib.storeActiveSession(email, code);
 
 		// Create the user if not already exists
 		if (userRepository.findByEmail(email) == null) {
@@ -96,24 +95,14 @@ public class UserController {
 			@RequestParam String email,
 			@RequestParam String code,
 			@RequestParam(required = false) List<String> fields) {
-
-		// Step 1: Validate the session (email + code)
-		if (!Env.IS_DEVELOPING) {
-			String sessionCode = activeSessions.get(email);
-			if (sessionCode == null || !sessionCode.equals(code)) {
-				return Lib.RestUnauthorized("Session expired. Please login again.");
-			}
-		}
-
-		// Step 2: Retrieve the user from the database
-		User user = userRepository.findByEmail(email);
-		if (user == null) {
-			return Lib.RestNotFound("User not found.");
+		User requestingUser = Lib.getRequestingUser(email, code, userRepository);
+		if (requestingUser == null) {
+			return Lib.userRestResponse;
 		}
 
 		// Step 3: Return all data if no fields are specified
 		if (fields == null || fields.isEmpty()) {
-			return ResponseEntity.ok(user); // Return full user object
+			return ResponseEntity.ok(requestingUser); // Return full user object
 		}
 
 		// Step 4: Create a response with only the requested fields
@@ -121,19 +110,19 @@ public class UserController {
 		for (String field : fields) {
 			switch (field.toLowerCase()) {
 				case "userid":
-					responseData.put("userId", user.getUserId());
+					responseData.put("userId", requestingUser.getUserId());
 					break;
 				case "email":
-					responseData.put("email", user.getEmail());
+					responseData.put("email", requestingUser.getEmail());
 					break;
 				case "addresses":
-					responseData.put("addresses", user.getAddresses());
+					responseData.put("addresses", requestingUser.getAddresses());
 					break;
 				case "createdat":
-					responseData.put("createdAt", user.getCreatedAt());
+					responseData.put("createdAt", requestingUser.getCreatedAt());
 					break;
 				case "updatedat":
-					responseData.put("updatedAt", user.getUpdatedAt());
+					responseData.put("updatedAt", requestingUser.getUpdatedAt());
 					break;
 				default:
 					// Ignore unknown fields or return an error message (your choice)
@@ -145,28 +134,14 @@ public class UserController {
 	}
 
 	@PatchMapping("/users")
-	public ResponseEntity<Map<String, String>> updateUserProfile(@RequestBody Map<String, Object> userUpdateMap) {
+	public ResponseEntity<?> updateUserProfile(@RequestBody Map<String, Object> request) {
 		// Extract fields from the map
-		String email = (String) userUpdateMap.get("email");
-		String code = (String) userUpdateMap.get("code");
-		List<String> newAddresses = (List<String>) userUpdateMap.get("addresses");
+		
+		List<String> newAddresses = (List<String>) request.get("addresses");
 
-		// Validate session
-		if (!Env.IS_DEVELOPING) {
-			String sessionCode = activeSessions.get(email);
-			if (sessionCode == null || !sessionCode.equals(code)) {
-				return Lib.RestUnauthorized("Session expired. Please login again.");
-			}
-		}
-
-		// Validate email
-		if (email == null || email.isEmpty()) {
-			return Lib.RestBadRequest("Email is required.");
-		}
-
-		User existingUser = userRepository.findByEmail(email);
+		User existingUser = (User) Lib.getRequestingUser(request, userRepository);
 		if (existingUser == null) {
-			return Lib.RestNotFound("User not found.");
+			return Lib.userRestResponse;
 		}
 
 		// Validate addresses

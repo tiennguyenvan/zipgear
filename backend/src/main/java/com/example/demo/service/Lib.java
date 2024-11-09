@@ -3,11 +3,23 @@ package com.example.demo.service;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import com.example.demo.model.User;
+import com.example.demo.repository.UserRepository;
+
 public class Lib {
+	private static final Map<String, String> validationCodes = new ConcurrentHashMap<>();
+	private static final Map<String, String> activeSessions = new ConcurrentHashMap<>();
+	public static ResponseEntity<?> userRestResponse = null;
+
+	@Autowired
+	private static UserRepository userRepository;
+
 	public static Map<String, String> RestMsg(String message) {
 		Map<String, String> response = new HashMap<>();
 		response.put("message", message);
@@ -30,8 +42,70 @@ public class Lib {
 	public static ResponseEntity<Map<String, String>> RestUnauthorized(String message) {
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Lib.RestMsg(message));
 	}
+
 	public static ResponseEntity<Map<String, String>> RestNotFound(String message) {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Lib.RestMsg(message));
+	}
+
+	///////////////////////////////////////
+	/// User validation
+	// --- Utility Method to Validate Session and Return User ---
+	public static User getRequestingUser(Map<String, ?> request, UserRepository userRepository) {
+		String email = (String) request.get("email");
+		String code = (String) request.get("code");
+
+		return getRequestingUser(email, code, userRepository);
+	}
+
+	public static User getRequestingUser(String email, String code, UserRepository userRepository) {
+		// Step 1: Check if email and code are provided
+		if (email == null) {
+			userRestResponse = RestBadRequest("Email is required.");
+			return null;
+		}
+		if (!Env.IS_DEVELOPING) {
+			if (code == null) {
+				userRestResponse = RestBadRequest("Code is required.");
+				return null;
+			}
+			if (!isSessionValid(email, code)) {
+				userRestResponse = RestUnauthorized("Session expired. Please login again.");
+				return null;
+			}
+		}
+
+		User user = userRepository.findByEmail(email);
+		if (user == null) {
+			userRestResponse = RestNotFound("User not found.");
+			return null;
+		}
+
+		return user;
+	}
+
+	public static void storeValidationCode(String email, String code) {
+		validationCodes.put(email, code);
+	}
+
+	public static boolean verifyValidationCode(String email, String code) {
+		return code != null && code.equals(validationCodes.get(email));
+	}
+
+	public static void removeValidationCode(String email) {
+		validationCodes.remove(email);
+	}
+
+	// --- Active Session Methods ---
+	public static void storeActiveSession(String email, String code) {
+		activeSessions.put(email, code);
+	}
+
+	public static boolean isSessionValid(String email, String code) {
+		return code != null && code.equals(activeSessions.get(email));
+	}
+
+	public static void removeActiveSession(String email) {
+		activeSessions.remove(email);
 	}
 
 	public static String ValidationCode() {
@@ -57,6 +131,8 @@ public class Lib {
 		return result.toString();
 	}
 
+	//////////////////////////////////////////
+	// utitlities
 	public static boolean isValidAddress(String address) {
 		if (address == null || address.trim().isEmpty()) {
 			return false;
