@@ -1,15 +1,14 @@
 package com.example.demo.model;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "ratings")
 public class Rating {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long ratingId;
+    private Long id;
 
     @Column(nullable = false)
     private Long productId;
@@ -23,12 +22,11 @@ public class Rating {
     @Column(length = 500)
     private String ratingDescription;
 
-    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
-    // Constructors
     public Rating() {
-        this.createdAt = LocalDateTime.now();  // Set createdAt at object creation
+        // Default constructor for JPA
     }
 
     public Rating(Long productId, Long userId, int ratingStars, String ratingDescription) {
@@ -36,17 +34,25 @@ public class Rating {
         this.userId = userId;
         this.ratingStars = ratingStars;
         this.ratingDescription = ratingDescription;
-        this.createdAt = LocalDateTime.now();
     }
 
-    // Getters and setters
-
-    public Long getRatingId() {
-        return ratingId;
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
     }
 
-    public void setRatingId(Long ratingId) {
-        this.ratingId = ratingId;
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
+    // Getters and Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getProductId() {
@@ -85,4 +91,28 @@ public class Rating {
         return createdAt;
     }
 
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    @Override
+    public String toString() {
+        return "Rating{" +
+                "id=" + id +
+                ", productId=" + productId +
+                ", userId=" + userId +
+                ", ratingStars=" + ratingStars +
+                ", ratingDescription='" + ratingDescription + '\'' +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
+    }
 }
