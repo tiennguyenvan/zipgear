@@ -1,4 +1,4 @@
-package com.zipgear.repository;
+package com.example.demo.repository;
 
 import com.zipgear.entity.Rating;
 import org.springframework.data.jpa.repository.JpaRepository;
