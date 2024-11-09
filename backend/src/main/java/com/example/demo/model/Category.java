@@ -2,6 +2,7 @@ package com.example.demo.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -22,7 +23,9 @@ public class Category {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Product> products;
+    private List<Product> products = new ArrayList<>();
+	
+	
 
     public Category() {
         this.createdAt = LocalDateTime.now();
@@ -35,11 +38,14 @@ public class Category {
         this.updatedAt = LocalDateTime.now();
     }
 
-
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+	public void addProduct(Product product) {
+		this.products.add(product);
+		product.setCategory(this);
+	}
 
     // Getters and Setters, including for products
     public List<Product> getProducts() {

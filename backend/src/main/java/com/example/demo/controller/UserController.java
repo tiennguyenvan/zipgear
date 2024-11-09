@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api")
 public class UserController {
 
 	@Autowired
@@ -32,7 +32,7 @@ public class UserController {
 	private final Map<String, String> activeSessions = new ConcurrentHashMap<>();
 
 	// POST api/user/request-code
-	@PostMapping("/request-code")
+	@PostMapping("/users/request-code")
 	public ResponseEntity<Map<String, String>> requestValidationCode(@RequestBody Map<String, String> request) {
 		String email = request.get("email");
 		if (email == null || email.isEmpty()) {
@@ -59,7 +59,7 @@ public class UserController {
 	 * @param request
 	 * @return
 	 */
-	@PostMapping("/verify-code")
+	@PostMapping("/users/verify-code")
 	public ResponseEntity<Map<String, String>> verifyCode(@RequestBody Map<String, String> request) {
 		String email = request.get("email");
 		String code = request.get("code");
@@ -67,7 +67,7 @@ public class UserController {
 		if (email == null || code == null) {
 			return Lib.RestBadRequest("Email and code are required.");
 		}
-		
+
 		String storedCode = validationCodes.get(email);
 
 		if (storedCode == null || !storedCode.equals(code)) {
@@ -88,7 +88,7 @@ public class UserController {
 		return Lib.RestOk("Login successful.");
 	}
 
-	@GetMapping("")
+	@GetMapping("/users")
 	public ResponseEntity<?> getUserData(
 			@RequestParam String email,
 			@RequestParam String code,
@@ -139,7 +139,7 @@ public class UserController {
 		return ResponseEntity.ok(responseData);
 	}
 
-	@PatchMapping("")
+	@PatchMapping("/users")
 	public ResponseEntity<Map<String, String>> updateUserProfile(@RequestBody Map<String, Object> userUpdateMap) {
 		// Extract fields from the map
 		String email = (String) userUpdateMap.get("email");

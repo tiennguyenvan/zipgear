@@ -2,34 +2,30 @@ package com.example.demo.controller;
 
 import com.example.demo.model.Product;
 import com.example.demo.repository.ProductRepository;
-import com.example.demo.service.Lib;
+// import com.example.demo.service.Lib;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 // import jakarta.persistence.criteria.CriteriaBuilder;
 // import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 // import jakarta.persistence.criteria.Root;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.springframework.http.HttpStatus;
-
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("/api")
 public class ProductController {
 
 	@Autowired
 	private ProductRepository productRepository;
 
-	@GetMapping("/")
+	@GetMapping("/products")
 	public ResponseEntity<List<Product>> getAllProducts(
 			@RequestParam(required = false) String keyword,
 			@RequestParam(required = false) String priceOrder, // "asc" or "desc"
@@ -102,7 +98,7 @@ public class ProductController {
 	}
 
 	// Get Product by ID
-	@GetMapping("/{id}")
+	@GetMapping("/products/{id}")
 	public ResponseEntity<Product> getProductById(@PathVariable Long id) {
 		Optional<Product> product = productRepository.findById(id);
 		return product.map(ResponseEntity::ok)
@@ -110,14 +106,14 @@ public class ProductController {
 	}
 
 	// Create a New Product
-	@PostMapping("/")
+	@PostMapping("/products")
 	public ResponseEntity<Product> createProduct(@RequestBody Product product) {
 		Product savedProduct = productRepository.save(product);
 		return ResponseEntity.status(HttpStatus.CREATED).body(savedProduct);
 	}
 
 	// Update Product by ID
-	@PutMapping("/{id}")
+	@PutMapping("/products/{id}")
 	public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product productDetails) {
 		Optional<Product> productOptional = productRepository.findById(id);
 
@@ -143,14 +139,14 @@ public class ProductController {
 	}
 
 	// Delete All Products
-	@DeleteMapping("/")
+	@DeleteMapping("/products")
 	public ResponseEntity<String> deleteAllProducts() {
 		productRepository.deleteAll();
 		return ResponseEntity.ok("All products deleted successfully.");
 	}
 
 	// Delete Product by ID
-	@DeleteMapping("/{id}")
+	@DeleteMapping("/products/{id}")
 	public ResponseEntity<String> deleteProductById(@PathVariable Long id) {
 		if (productRepository.existsById(id)) {
 			productRepository.deleteById(id);

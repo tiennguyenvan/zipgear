@@ -16,21 +16,21 @@ import java.util.Optional;
 import java.time.LocalDateTime;
 
 @RestController
-@RequestMapping("/api/categories")
+@RequestMapping("/api")
 public class CategoryController {
 
 	@Autowired
 	private CategoryRepository categoryRepository;
 
 	// 1. Get all categories
-	@GetMapping("/")
+	@GetMapping("/categories")
 	public ResponseEntity<List<Category>> getAllCategories() {
 		List<Category> categories = categoryRepository.findAll();
 		return ResponseEntity.ok(categories);
 	}
 
 	// 2. Get a category by ID
-	@GetMapping("/{id}")
+	@GetMapping("/categories/{id}")
 	public ResponseEntity<Category> getCategoryById(@PathVariable Long id) {
 		Optional<Category> category = categoryRepository.findById(id);
 		return category.map(ResponseEntity::ok)
@@ -38,7 +38,7 @@ public class CategoryController {
 	}
 
 	// 3. Create a new category
-	@PostMapping("/")
+	@PostMapping("/categories")
 	public ResponseEntity<?> createCategory(@RequestBody Category category) {
 		// Check if the name is provided
 		if (!StringUtils.hasText(category.getName())) {
@@ -59,7 +59,7 @@ public class CategoryController {
 	}
 
 	// 4. Update a category by ID
-	@PutMapping("/{id}")
+	@PutMapping("/categories/{id}")
 	public ResponseEntity<Category> updateCategory(@PathVariable Long id, @RequestBody Category categoryDetails) {
 		Optional<Category> categoryOptional = categoryRepository.findById(id);
 
@@ -76,20 +76,20 @@ public class CategoryController {
 	}
 
 	// 5. Delete all categories
-	@DeleteMapping("/")
-	public ResponseEntity<String> deleteAllCategories() {
+	@DeleteMapping("/categories")
+	public ResponseEntity<?> deleteAllCategories() {
 		categoryRepository.deleteAll();
-		return ResponseEntity.ok("All categories deleted successfully.");
+		return Lib.RestOk("All categories deleted successfully.");
 	}
 
 	// 6. Delete a category by ID
-	@DeleteMapping("/{id}")
-	public ResponseEntity<String> deleteCategoryById(@PathVariable Long id) {
+	@DeleteMapping("/categories/{id}")
+	public ResponseEntity<?> deleteCategoryById(@PathVariable Long id) {
 		if (categoryRepository.existsById(id)) {
 			categoryRepository.deleteById(id);
-			return ResponseEntity.ok("Category deleted successfully.");
+			return Lib.RestOk("Category deleted successfully.");
 		} else {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Category not found.");
+			return Lib.RestNotFound("Category not found.");
 		}
 	}
 }

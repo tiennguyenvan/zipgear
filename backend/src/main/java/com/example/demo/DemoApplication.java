@@ -1,64 +1,139 @@
 package com.example.demo;
-import java.util.ArrayList;
-import java.util.Arrays;
+
+import java.math.BigDecimal;
 import java.util.List;
 
-
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 
 import com.example.demo.model.Category;
-import com.example.demo.model.User;
+import com.example.demo.model.Product;
 import com.example.demo.repository.CategoryRepository;
 import com.example.demo.repository.ProductRepository;
 import com.example.demo.repository.UserRepository;
-import com.example.demo.service.EmailService;
-import com.example.demo.service.Env;
-import com.example.demo.service.Lib;
-import io.github.cdimascio.dotenv.Dotenv;
-
 
 @SpringBootApplication
 public class DemoApplication {
-	private static final Dotenv dotenv = Dotenv.load();	
+
     public static void main(String[] args) {
-        SpringApplication.run(DemoApplication.class, args);	
-		// System.out.println("IS_DEVELOPING" + Boolean.parseBoolean("true"));
-		// System.out.println(Env.IS_DEVELOPING);
-		// System.out.println(dotenv.get("VUE_APP_IS_DEVELOPING"));		
-		// System.out.println(dotenv.get("VUE_APP_VALIDATION_CODE_LENGTH"));		
+        SpringApplication.run(DemoApplication.class, args);
     }
 
-	@Autowired
-    private UserRepository userRepository;
-	private CategoryRepository categoryRepository;
-	private ProductRepository productRepository;
-
-    // Use CommandLineRunner to test sending the email on startup
     @Bean
-    public CommandLineRunner run(ApplicationContext ctx) {
+    ApplicationRunner init(CategoryRepository categoryRepository, ProductRepository productRepository, UserRepository userRepository) {
         return args -> {
-			// Create 3 categories	
-			
+            // Clear existing data for a fresh start
+            productRepository.deleteAll();
+            categoryRepository.deleteAll();
 
-		    // Create 9 demo products here
+            // Create categories and products directly, using addProduct to set relationships
 
-            // EmailService emailService = ctx.getBean(EmailService.class);
+            // Category: Laptop
+            Category laptopCategory = new Category();
+            laptopCategory.setName("Laptop");
 
-            // try {
-            //     emailService.sendEmail(
-            //         "nguyentien.jobs@gmail.com",  // Replace with your recipient
-            //         "Test Subject",
-            //         "This is a test email from Spring Boot!"
-            //     );
-            //     System.out.println("Email sent successfully!");
-            // } catch (Exception e) {
-            //     System.err.println("Failed to send email: " + e.getMessage());
-            // }
+            Product laptop1 = new Product();
+            laptop1.setTitle("Laptop 1");
+            laptop1.setDescription("Description for Laptop 1");
+            laptop1.setPrice(new BigDecimal("799.99"));
+            laptop1.setImageSrcs(List.of("https://picsum.photos/200?random=1", "https://picsum.photos/200?random=2"));
+            laptop1.setStock(10);
+            laptop1.setAverageRating(4.5);
+
+            Product laptop2 = new Product();
+            laptop2.setTitle("Laptop 2");
+            laptop2.setDescription("Description for Laptop 2");
+            laptop2.setPrice(new BigDecimal("899.99"));
+            laptop2.setImageSrcs(List.of("https://picsum.photos/200?random=3", "https://picsum.photos/200?random=4"));
+            laptop2.setStock(15);
+            laptop2.setAverageRating(4.0);
+
+            Product laptop3 = new Product();
+            laptop3.setTitle("Laptop 3");
+            laptop3.setDescription("Description for Laptop 3");
+            laptop3.setPrice(new BigDecimal("999.99"));
+            laptop3.setImageSrcs(List.of("https://picsum.photos/200?random=5", "https://picsum.photos/200?random=6"));
+            laptop3.setStock(5);
+            laptop3.setAverageRating(4.8);
+
+            // Add products to the category
+            laptopCategory.addProduct(laptop1);
+            laptopCategory.addProduct(laptop2);
+            // laptopCategory.addProduct(laptop3);
+
+            // Category: Mobile
+            Category mobileCategory = new Category();
+            mobileCategory.setName("Mobile");
+
+            Product mobile1 = new Product();
+            mobile1.setTitle("Mobile 1");
+            mobile1.setDescription("Description for Mobile 1");
+            mobile1.setPrice(new BigDecimal("499.99"));
+            mobile1.setImageSrcs(List.of("https://picsum.photos/200?random=7", "https://picsum.photos/200?random=8"));
+            mobile1.setStock(25);
+            mobile1.setAverageRating(4.3);
+
+            Product mobile2 = new Product();
+            mobile2.setTitle("Mobile 2");
+            mobile2.setDescription("Description for Mobile 2");
+            mobile2.setPrice(new BigDecimal("599.99"));
+            mobile2.setImageSrcs(List.of("https://picsum.photos/200?random=9", "https://picsum.photos/200?random=10"));
+            mobile2.setStock(30);
+            mobile2.setAverageRating(4.7);
+
+            Product mobile3 = new Product();
+            mobile3.setTitle("Mobile 3");
+            mobile3.setDescription("Description for Mobile 3");
+            mobile3.setPrice(new BigDecimal("699.99"));
+            mobile3.setImageSrcs(List.of("https://picsum.photos/200?random=11", "https://picsum.photos/200?random=12"));
+            mobile3.setStock(20);
+            mobile3.setAverageRating(4.6);
+
+            // Add products to the category
+            mobileCategory.addProduct(mobile1);
+            mobileCategory.addProduct(mobile2);
+            mobileCategory.addProduct(mobile3);
+
+            // Category: Headphone
+            Category headphoneCategory = new Category();
+            headphoneCategory.setName("Headphone");
+
+            Product headphone1 = new Product();
+            headphone1.setTitle("Headphone 1");
+            headphone1.setDescription("Description for Headphone 1");
+            headphone1.setPrice(new BigDecimal("99.99"));
+            headphone1.setImageSrcs(List.of("https://picsum.photos/200?random=13", "https://picsum.photos/200?random=14"));
+            headphone1.setStock(50);
+            headphone1.setAverageRating(4.2);
+
+            Product headphone2 = new Product();
+            headphone2.setTitle("Headphone 2");
+            headphone2.setDescription("Description for Headphone 2");
+            headphone2.setPrice(new BigDecimal("149.99"));
+            headphone2.setImageSrcs(List.of("https://picsum.photos/200?random=15", "https://picsum.photos/200?random=16"));
+            headphone2.setStock(40);
+            headphone2.setAverageRating(4.4);
+
+            Product headphone3 = new Product();
+            headphone3.setTitle("Headphone 3");
+            headphone3.setDescription("Description for Headphone 3");
+            headphone3.setPrice(new BigDecimal("199.99"));
+            headphone3.setImageSrcs(List.of("https://picsum.photos/200?random=17", "https://picsum.photos/200?random=18"));
+            headphone3.setStock(35);
+            headphone3.setAverageRating(4.1);
+
+            // Add products to the category
+            headphoneCategory.addProduct(headphone1);
+            headphoneCategory.addProduct(headphone2);
+            headphoneCategory.addProduct(headphone3);
+
+            // Save each category individually
+            categoryRepository.save(laptopCategory);
+            // categoryRepository.save(mobileCategory);
+            // categoryRepository.save(headphoneCategory);
         };
     }
 }
