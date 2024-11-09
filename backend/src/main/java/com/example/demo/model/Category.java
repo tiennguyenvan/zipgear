@@ -25,8 +25,6 @@ public class Category {
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Product> products = new ArrayList<>();
 	
-	
-
     public Category() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();

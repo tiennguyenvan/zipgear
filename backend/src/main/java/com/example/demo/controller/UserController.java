@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.model.User;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.EmailService;
+import com.example.demo.service.Env;
 import com.example.demo.service.Lib;
 
 import org.eclipse.angus.mail.handlers.message_rfc822;
@@ -68,10 +69,12 @@ public class UserController {
 			return Lib.RestBadRequest("Email and code are required.");
 		}
 
-		String storedCode = validationCodes.get(email);
+		if (!Env.IS_DEVELOPING) {
+			String storedCode = validationCodes.get(email);
 
-		if (storedCode == null || !storedCode.equals(code)) {
-			return Lib.RestUnauthorized("Invalid validation code.");
+			if (storedCode == null || !storedCode.equals(code)) {
+				return Lib.RestUnauthorized("Invalid validation code.");
+			}
 		}
 
 		// System.out.println("storedCode: " + storedCode);
@@ -95,9 +98,11 @@ public class UserController {
 			@RequestParam(required = false) List<String> fields) {
 
 		// Step 1: Validate the session (email + code)
-		String sessionCode = activeSessions.get(email);
-		if (sessionCode == null || !sessionCode.equals(code)) {
-			return Lib.RestUnauthorized("Session expired. Please login again.");
+		if (!Env.IS_DEVELOPING) {
+			String sessionCode = activeSessions.get(email);
+			if (sessionCode == null || !sessionCode.equals(code)) {
+				return Lib.RestUnauthorized("Session expired. Please login again.");
+			}
 		}
 
 		// Step 2: Retrieve the user from the database
@@ -147,9 +152,11 @@ public class UserController {
 		List<String> newAddresses = (List<String>) userUpdateMap.get("addresses");
 
 		// Validate session
-		String sessionCode = activeSessions.get(email);
-		if (sessionCode == null || !sessionCode.equals(code)) {
-			return Lib.RestUnauthorized("Session expired. Please login again.");
+		if (!Env.IS_DEVELOPING) {
+			String sessionCode = activeSessions.get(email);
+			if (sessionCode == null || !sessionCode.equals(code)) {
+				return Lib.RestUnauthorized("Session expired. Please login again.");
+			}
 		}
 
 		// Validate email
