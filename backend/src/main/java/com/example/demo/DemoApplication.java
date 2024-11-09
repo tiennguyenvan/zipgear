@@ -1,6 +1,7 @@
 package com.example.demo;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.boot.ApplicationRunner;
@@ -11,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 
 import com.example.demo.model.Category;
 import com.example.demo.model.Product;
+import com.example.demo.model.User;
 import com.example.demo.repository.CategoryRepository;
 import com.example.demo.repository.ProductRepository;
 import com.example.demo.repository.UserRepository;
@@ -23,13 +25,25 @@ public class DemoApplication {
     }
 
     @Bean
-    ApplicationRunner init(CategoryRepository categoryRepository, ProductRepository productRepository, UserRepository userRepository) {
+    ApplicationRunner init(CategoryRepository categoryRepository, ProductRepository productRepository,
+            UserRepository userRepository) {
         return args -> {
             // Clear existing data for a fresh start
             productRepository.deleteAll();
             categoryRepository.deleteAll();
+            userRepository.deleteAll();
 
-            // Create categories and products directly, using addProduct to set relationships
+
+            User mockUser = new User();
+            mockUser.setEmail("nguyentien.jobs@gmail.com");
+            mockUser.setAddresses(Arrays.asList("123 Mock St, Mock City, Mock Country"));
+
+            // Save the user to the repository
+            userRepository.save(mockUser);
+
+            // System.out.println("Mock user created: " + mockUser.getEmail());
+            // Create categories and products directly, using addProduct to set
+            // relationships
 
             // Category: Laptop
             Category laptopCategory = new Category();
@@ -105,7 +119,8 @@ public class DemoApplication {
             headphone1.setTitle("Headphone 1");
             headphone1.setDescription("Description for Headphone 1");
             headphone1.setPrice(new BigDecimal("99.99"));
-            headphone1.setImageSrcs(List.of("https://picsum.photos/200?random=13", "https://picsum.photos/200?random=14"));
+            headphone1.setImageSrcs(
+                    List.of("https://picsum.photos/200?random=13", "https://picsum.photos/200?random=14"));
             headphone1.setStock(50);
             headphone1.setAverageRating(4.2);
 
@@ -113,7 +128,8 @@ public class DemoApplication {
             headphone2.setTitle("Headphone 2");
             headphone2.setDescription("Description for Headphone 2");
             headphone2.setPrice(new BigDecimal("149.99"));
-            headphone2.setImageSrcs(List.of("https://picsum.photos/200?random=15", "https://picsum.photos/200?random=16"));
+            headphone2.setImageSrcs(
+                    List.of("https://picsum.photos/200?random=15", "https://picsum.photos/200?random=16"));
             headphone2.setStock(40);
             headphone2.setAverageRating(4.4);
 
@@ -121,7 +137,8 @@ public class DemoApplication {
             headphone3.setTitle("Headphone 3");
             headphone3.setDescription("Description for Headphone 3");
             headphone3.setPrice(new BigDecimal("199.99"));
-            headphone3.setImageSrcs(List.of("https://picsum.photos/200?random=17", "https://picsum.photos/200?random=18"));
+            headphone3.setImageSrcs(
+                    List.of("https://picsum.photos/200?random=17", "https://picsum.photos/200?random=18"));
             headphone3.setStock(35);
             headphone3.setAverageRating(4.1);
 
