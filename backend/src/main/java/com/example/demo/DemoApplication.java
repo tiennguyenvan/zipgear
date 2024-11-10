@@ -10,11 +10,19 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
+import com.example.demo.config.OrderStatus;
+import com.example.demo.model.Cart;
+import com.example.demo.model.CartItem;
 import com.example.demo.model.Category;
+import com.example.demo.model.Order;
 import com.example.demo.model.Product;
+import com.example.demo.model.Rating;
 import com.example.demo.model.User;
+import com.example.demo.repository.CartRepository;
 import com.example.demo.repository.CategoryRepository;
+import com.example.demo.repository.OrderRepository;
 import com.example.demo.repository.ProductRepository;
+import com.example.demo.repository.RatingRepository;
 import com.example.demo.repository.UserRepository;
 
 @SpringBootApplication
@@ -25,13 +33,22 @@ public class DemoApplication {
     }
 
     @Bean
-    ApplicationRunner init(CategoryRepository categoryRepository, ProductRepository productRepository,
-            UserRepository userRepository) {
+    ApplicationRunner init(
+		CategoryRepository categoryRepository, 
+		ProductRepository productRepository,
+        UserRepository userRepository,
+		CartRepository cartRepository,
+        RatingRepository ratingRepository,
+        OrderRepository orderRepository        
+		) {
         return args -> {
             // Clear existing data for a fresh start
             productRepository.deleteAll();
             categoryRepository.deleteAll();
             userRepository.deleteAll();
+			cartRepository.deleteAll();
+			ratingRepository.deleteAll();
+			orderRepository.deleteAll();
 
 
             User mockUser = new User();
@@ -56,6 +73,7 @@ public class DemoApplication {
             laptop1.setImageSrcs(List.of("https://picsum.photos/200?random=1", "https://picsum.photos/200?random=2"));
             laptop1.setStock(10);
             laptop1.setAverageRating(4.5);
+			laptop1.addRating(mockUser, 5, "Excellent laptop, very fast and reliable.");			
 
             Product laptop2 = new Product();
             laptop2.setTitle("Laptop 2");
@@ -64,6 +82,7 @@ public class DemoApplication {
             laptop2.setImageSrcs(List.of("https://picsum.photos/200?random=3", "https://picsum.photos/200?random=4"));
             laptop2.setStock(15);
             laptop2.setAverageRating(4.0);
+			
 
             Product laptop3 = new Product();
             laptop3.setTitle("Laptop 3");
@@ -72,6 +91,7 @@ public class DemoApplication {
             laptop3.setImageSrcs(List.of("https://picsum.photos/200?random=5", "https://picsum.photos/200?random=6"));
             laptop3.setStock(5);
             laptop3.setAverageRating(4.8);
+			
 
             // Add products to the category
             laptopCategory.addProduct(laptop1);
@@ -151,6 +171,31 @@ public class DemoApplication {
             categoryRepository.save(laptopCategory);
             categoryRepository.save(mobileCategory);
             categoryRepository.save(headphoneCategory);
+
+			Cart cart = new Cart(mockUser);
+            CartItem cartItem1 = new CartItem(cart, laptop1, 2); // Adding 2 units of Laptop 1
+            cart.getItems().add(cartItem1);
+            cartRepository.save(cart);
+
+			// Checkout - Create an Order from the first cart
+            BigDecimal totalPrice1 = cart.getItems().stream()
+                .map(item -> item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            String productListJson1 = "[{\"title\": \"Laptop 1\", \"quantity\": 2, \"price\": 799.99}]";
+            Order order1 = new Order(mockUser, productListJson1, "123 Mock St, Mock City, Mock Country", totalPrice1);
+            order1.setOrderStatus(OrderStatus.PROCESSING);
+            orderRepository.save(order1);
+
+			// Second Cart with other products            
+			cart.getItems().clear();
+            CartItem cartItem2 = new CartItem(cart, mobile1, 1); // Adding 1 unit of Mobile 1
+            cart.getItems().add(cartItem2);
+            // Save the second cart with items
+            cartRepository.save(cart);
+
+			;
+
         };
     }
 }

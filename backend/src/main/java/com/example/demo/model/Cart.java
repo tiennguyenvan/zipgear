@@ -31,16 +31,15 @@ public class Cart {
 
 	public Cart() {
 		this.items = new ArrayList<CartItem>();
+		this.createdAt = LocalDateTime.now();
+		this.updatedAt = LocalDateTime.now();
 	}
 
 	public Cart(User user) {
 		this();
 		this.user = user;
 	}
-	@PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
+	
 	@PreUpdate
 	protected void onUpdate() {
 		this.updatedAt = LocalDateTime.now();

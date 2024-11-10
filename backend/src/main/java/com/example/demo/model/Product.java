@@ -37,9 +37,20 @@ public class Product {
 	@JsonIgnore
     private List<Rating> ratings = new ArrayList<>();
 
+	public void setRating(List<Rating> ratings) {
+		this.ratings = ratings;
+	}
+	public List<Rating> getRating() {
+		return ratings;
+	}
+	public void addRating(User user, int ratingStars, String ratingDescription) {
+		Rating rating = new Rating(this, user, ratingStars, ratingDescription);
+		this.ratings.add(rating);
+	}
+	
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id", nullable = false)
-	@JsonIgnore
     private Category category;
 
     @Column(nullable = false)

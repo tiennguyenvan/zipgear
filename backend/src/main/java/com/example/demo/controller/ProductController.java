@@ -1,8 +1,11 @@
 package com.example.demo.controller;
 
+import com.example.demo.model.Category;
 import com.example.demo.model.Product;
+import com.example.demo.repository.CategoryRepository;
 import com.example.demo.repository.ProductRepository;
 // import com.example.demo.service.Lib;
+import com.example.demo.service.Lib;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -106,54 +109,70 @@ public class ProductController {
 	}
 
 	// Create a New Product
+	@Autowired
+	private CategoryRepository categoryRepository;
+
 	@PostMapping("/products")
-	public ResponseEntity<Product> createProduct(@RequestBody Product product) {
-		Product savedProduct = productRepository.save(product);
+	public ResponseEntity<?> createProduct(@RequestBody Product requestProduct) {
+		if (requestProduct.getCategory() == null || requestProduct.getCategory().getCategoryId() == null) {
+			return Lib.RestBadRequest("Category is required");
+		}
+
+		Optional<Category> categoryOptional = categoryRepository.findById(requestProduct.getCategory().getCategoryId());
+		if (!categoryOptional.isPresent()) {
+			return Lib.RestBadRequest("Category does not exist");
+		}
+
+		requestProduct.setCategory(categoryOptional.get()); // Set the retrieved Category object
+		Product savedProduct = productRepository.save(requestProduct);
 		return ResponseEntity.status(HttpStatus.CREATED).body(savedProduct);
 	}
 
 	// Update Product by ID
 	@PutMapping("/products/{id}")
-	public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product productDetails) {
+	public ResponseEntity<?> updateProduct(@PathVariable Long id, @RequestBody Product requestProduct) {
 		Optional<Product> productOptional = productRepository.findById(id);
 
-		if (productOptional.isPresent()) {
-			Product existingProduct = productOptional.get();
-			existingProduct.setTitle(productDetails.getTitle());
-			existingProduct.setDescription(productDetails.getDescription());
-			existingProduct.setPrice(productDetails.getPrice());
-			existingProduct.setImageSrcs(productDetails.getImageSrcs());
-			existingProduct.setAverageRating(productDetails.getAverageRating());
-
-			// Set the category by using the provided Category object
-			existingProduct.setCategory(productDetails.getCategory());
-
-			existingProduct.setStock(productDetails.getStock());
-
-			// The updatedAt field will be set automatically with @PreUpdate
-			Product updatedProduct = productRepository.save(existingProduct);
-			return ResponseEntity.ok(updatedProduct);
-		} else {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+		if (!productOptional.isPresent()) {
+			return Lib.RestNotFound("Product not found");
 		}
+		if (requestProduct.getCategory() == null || requestProduct.getCategory().getCategoryId() == null) {
+			return Lib.RestBadRequest("Category is required");
+		}
+		Optional<Category> categoryOptional = categoryRepository.findById(requestProduct.getCategory().getCategoryId());
+		if (!categoryOptional.isPresent()) {
+			return Lib.RestBadRequest("Category does not exist");
+		}
+
+		Product existingProduct = productOptional.get();
+		existingProduct.setCategory(categoryOptional.get());
+		existingProduct.setTitle(requestProduct.getTitle());
+		existingProduct.setDescription(requestProduct.getDescription());
+		existingProduct.setPrice(requestProduct.getPrice());
+		existingProduct.setImageSrcs(requestProduct.getImageSrcs());
+		existingProduct.setAverageRating(requestProduct.getAverageRating());
+		existingProduct.setStock(requestProduct.getStock());
+
+		// The updatedAt field will be set automatically with @PreUpdate
+		Product updatedProduct = productRepository.save(existingProduct);
+		return ResponseEntity.ok(updatedProduct);
+
 	}
 
 	// Delete All Products
-	@DeleteMapping("/products")
-	public ResponseEntity<String> deleteAllProducts() {
-		productRepository.deleteAll();
-		return ResponseEntity.ok("All products deleted successfully.");
-	}
+	// @DeleteMapping("/products")
+	// public ResponseEntity<String> deleteAllProducts() {
+	// 	productRepository.deleteAll();
+	// 	return ResponseEntity.ok("All products deleted successfully.");
+	// }
 
 	// Delete Product by ID
 	@DeleteMapping("/products/{id}")
-	public ResponseEntity<String> deleteProductById(@PathVariable Long id) {
+	public ResponseEntity<?> deleteProductById(@PathVariable Long id) {
 		if (productRepository.existsById(id)) {
 			productRepository.deleteById(id);
-			return ResponseEntity.ok("Product deleted successfully.");
-		} else {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found.");
+			return Lib.RestOk("Product deleted successfully.");
 		}
+		return Lib.RestNotFound("Product not found.");
 	}
-
 }

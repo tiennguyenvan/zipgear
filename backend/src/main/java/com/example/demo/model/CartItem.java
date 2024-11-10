@@ -17,7 +17,7 @@ public class CartItem {
 	@JsonIgnore
     private Cart cart;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 

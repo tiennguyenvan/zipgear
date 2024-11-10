@@ -14,7 +14,7 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 import java.util.Optional;
 import java.time.LocalDateTime;
-
+// @fixme: only admin can use category CRUD
 @RestController
 @RequestMapping("/api")
 public class CategoryController {
@@ -75,12 +75,12 @@ public class CategoryController {
 		}
 	}
 
-	// 5. Delete all categories
-	@DeleteMapping("/categories")
-	public ResponseEntity<?> deleteAllCategories() {
-		categoryRepository.deleteAll();
-		return Lib.RestOk("All categories deleted successfully.");
-	}
+	// // 5. Delete all categories
+	// @DeleteMapping("/categories")
+	// public ResponseEntity<?> deleteAllCategories() {		
+	// 	categoryRepository.deleteAll();
+	// 	return Lib.RestOk("All categories deleted successfully.");
+	// }
 
 	// 6. Delete a category by ID
 	@DeleteMapping("/categories/{id}")
