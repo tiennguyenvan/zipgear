@@ -25,9 +25,6 @@ public class CartController {
 	@Autowired
 	private ProductRepository productRepository;
 
-	@Autowired
-	private CartItemRepository cartItemRepository;
-
 	// Get cart by user ID
 	@GetMapping("/carts")
 	public ResponseEntity<?> getCart(@RequestBody Map<String, String> request) {

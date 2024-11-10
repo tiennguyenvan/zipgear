@@ -28,7 +28,10 @@ public class User {
 	@Column(nullable = false)
 	private LocalDateTime updatedAt;
 
-	// Method triggered before an update
+	@PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 	@PreUpdate
 	protected void onUpdate() {
 		// Update timestamp automatically before saving changes

@@ -1,16 +1,7 @@
 package com.example.demo.model;
 
-
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "ratings")
@@ -19,11 +10,13 @@ public class Rating {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long productId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
 
-    @Column(nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(nullable = false)
     private int ratingStars;
@@ -35,19 +28,17 @@ public class Rating {
     private LocalDateTime updatedAt;
 
     public Rating() {
-        // Default constructor for JPA
+		createdAt = LocalDateTime.now();
+		updatedAt = LocalDateTime.now();
     }
 
-    public Rating(Long productId, Long userId, int ratingStars, String ratingDescription) {
-        this.productId = productId;
-        this.userId = userId;
+    public Rating(Product product, User user, int ratingStars, String ratingDescription) {
+        this.product = product;
+        this.user = user;
         this.ratingStars = ratingStars;
         this.ratingDescription = ratingDescription;
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
+		createdAt = LocalDateTime.now();
+		updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
@@ -64,20 +55,20 @@ public class Rating {
         this.id = id;
     }
 
-    public Long getProductId() {
-        return productId;
+    public Product getProduct() {
+        return product;
     }
 
-    public void setProductId(Long productId) {
-        this.productId = productId;
+    public void setProduct(Product product) {
+        this.product = product;
     }
 
-    public Long getUserId() {
-        return userId;
+    public User getUser() {
+        return user;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public int getRatingStars() {
@@ -110,18 +101,5 @@ public class Rating {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    @Override
-    public String toString() {
-        return "Rating{" +
-                "id=" + id +
-                ", productId=" + productId +
-                ", userId=" + userId +
-                ", ratingStars=" + ratingStars +
-                ", ratingDescription='" + ratingDescription + '\'' +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                '}';
     }
 }
