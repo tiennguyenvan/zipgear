@@ -12,85 +12,87 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Table(name = "products")
 public class Product {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long productId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long productId;
 
-    @Column(nullable = false, length = 100)
-    private String title;
+	@Column(nullable = false, length = 100)
+	private String title;
 
-    @Column(length = 500)
-    private String description;
+	@Column(length = 500)
+	private String description;
 
-    @Column(nullable = false)
-    private BigDecimal price;
+	@Column(nullable = false)
+	private BigDecimal price;
 
-    @ElementCollection
-    @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
-    @Column(name = "image_src")
-    private List<String> imageSrcs;
+	@ElementCollection
+	@CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
+	@Column(name = "image_src")
+	private List<String> imageSrcs;
 
-    @Column(name = "average_rating")
-    private Double averageRating;
+	@Column(name = "average_rating")
+	private Double averageRating;
 
-	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)	
+	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JsonIgnore
-    private List<Rating> ratings = new ArrayList<>();
+	private List<Rating> ratings = new ArrayList<>();	
 
 	public void setRating(List<Rating> ratings) {
 		this.ratings = ratings;
 	}
+	@JsonIgnore
 	public List<Rating> getRating() {
 		return ratings;
 	}
+
 	public void addRating(User user, int ratingStars, String ratingDescription) {
 		Rating rating = new Rating(this, user, ratingStars, ratingDescription);
 		this.ratings.add(rating);
 	}
-	
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "category_id", nullable = false)
-    private Category category;
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "category_id", nullable = false)
+	private Category category;
 
-    @Column(nullable = false)
-    private Integer stock;
+	@Column(nullable = false)
+	private Integer stock;
 
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+	@Column(nullable = false, updatable = false)
+	private LocalDateTime createdAt;
 
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
+	@Column(nullable = false)
+	private LocalDateTime updatedAt;
 
-    public Product() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
+	public Product() {
+		this.createdAt = LocalDateTime.now();
+		this.updatedAt = LocalDateTime.now();
+	}
 
-    public Product(String title, String description, BigDecimal price, List<String> imageSrcs, Category category, Integer stock) {
-        this.title = title;
-        this.description = description;
-        this.price = price;
-        this.imageSrcs = imageSrcs;
-        this.category = category;
-        this.stock = stock;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
-	
+	public Product(String title, String description, BigDecimal price, List<String> imageSrcs, Category category,
+			Integer stock) {
+		this.title = title;
+		this.description = description;
+		this.price = price;
+		this.imageSrcs = imageSrcs;
+		this.category = category;
+		this.stock = stock;
+		this.createdAt = LocalDateTime.now();
+		this.updatedAt = LocalDateTime.now();
+	}
+
 	@PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
+	protected void onUpdate() {
+		this.updatedAt = LocalDateTime.now();
+	}
 
-    // Getters and setters, including for category
-    public Category getCategory() {
-        return category;
-    }
+	// Getters and setters, including for category
+	public Category getCategory() {
+		return category;
+	}
 
-    public void setCategory(Category category) {
-        this.category = category;
-    }    
+	public void setCategory(Category category) {
+		this.category = category;
+	}
 
 	public Long getProductId() {
 		return productId;

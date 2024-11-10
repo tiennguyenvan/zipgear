@@ -73,7 +73,7 @@ public class DemoApplication {
             laptop1.setImageSrcs(List.of("https://picsum.photos/200?random=1", "https://picsum.photos/200?random=2"));
             laptop1.setStock(10);
             laptop1.setAverageRating(4.5);
-			laptop1.addRating(mockUser, 5, "Excellent laptop, very fast and reliable.");			
+			
 
             Product laptop2 = new Product();
             laptop2.setTitle("Laptop 2");
@@ -161,6 +161,7 @@ public class DemoApplication {
                     List.of("https://picsum.photos/200?random=17", "https://picsum.photos/200?random=18"));
             headphone3.setStock(35);
             headphone3.setAverageRating(4.1);
+			headphone3.addRating(mockUser, 5, "Excellent headphone, very rich and reliable.");
 
             // Add products to the category
             headphoneCategory.addProduct(headphone1);

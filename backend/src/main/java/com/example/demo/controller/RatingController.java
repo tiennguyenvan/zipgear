@@ -31,7 +31,7 @@ public class RatingController {
 	// get all ratings or ratings from a user
 	// if email & code are provided
 	@GetMapping("/ratings")
-	public ResponseEntity<?> getAllRatings(@RequestBody Map<String, Object> request) {
+	public ResponseEntity<?> getAllRatings(@RequestBody(required = false) Map<String, Object> request) {
 		// User user = Lib.getRequestingUser(request, userRepository);
 		// if (user != null) {
 		// return ResponseEntity.ok(ratingRepository.findByUser(user));
@@ -43,7 +43,7 @@ public class RatingController {
 	// if email & code are provided,
 	// get only ratings from that user for the product
 	@GetMapping("/ratings/{productId}")
-	public ResponseEntity<?> getRatingsByProductId(@RequestBody Map<String, Object> request,
+	public ResponseEntity<?> getRatingsByProductId(@RequestBody(required = false) Map<String, Object> request,
 			@PathVariable Long productId) {
 		Product product = productRepository.findById(productId).orElse(null);
 		if (product == null) {

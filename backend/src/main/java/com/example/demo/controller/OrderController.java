@@ -125,12 +125,11 @@ public class OrderController {
 
 		// Check if the order is in a cancelable state (PROCESSING)
 		if (order.getOrderStatus() != OrderStatus.PROCESSING) {
-			return ResponseEntity.badRequest()
-					.body("Order cannot be canceled as it is already " + order.getOrderStatus());
+			return Lib.RestBadRequest("Order cannot be canceled as it is already " + order.getOrderStatus());
 		}
 
 		order.setOrderStatus(OrderStatus.CANCELLED);
-		return ResponseEntity.ok("Order has been canceled successfully.");
+		return Lib.RestOk("Order has been canceled successfully.");
 
 		// @fixme: admin can change status to other types
 	}
@@ -142,6 +141,6 @@ public class OrderController {
 		if (orderRepository.existsById(orderId)) {
 			orderRepository.deleteById(orderId);
 		}
-		return ResponseEntity.ok("Order deleted successfully.");
+		return Lib.RestOk("Order deleted successfully.");
 	}
 }
