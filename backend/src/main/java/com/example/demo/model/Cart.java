@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "carts")
 public class Cart {
@@ -13,8 +15,9 @@ public class Cart {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long cartId;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
+	@JsonIgnore
 	private User user;
 
 	@OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
@@ -27,9 +30,11 @@ public class Cart {
 	private LocalDateTime updatedAt;
 
 	public Cart() {
+		this.items = new ArrayList<CartItem>();
 	}
 
 	public Cart(User user) {
+		this();
 		this.user = user;
 	}
 	@PrePersist

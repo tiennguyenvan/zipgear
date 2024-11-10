@@ -30,51 +30,71 @@ public class CartController {
 	public ResponseEntity<?> getCart(@RequestBody Map<String, String> request) {
 		User user = Lib.getRequestingUser(request, userRepository);
 		if (user == null) {
-			return Lib.userRestResponse;
+			return Lib.userRestResponseErr;
 		}
 
-		Optional<Cart> cart = cartRepository.findByUser(user);
-		if (cart.isEmpty()) {
-			return Lib.RestNotFound("Cart not found");
+		Cart cart = cartRepository.findByUser(user);
+		if (cart == null) {
+			cart = new Cart(user);
 		}
 
-		return ResponseEntity.ok(cart.get());
+		return ResponseEntity.ok(cart);
 	}
+		
+	@PutMapping("/carts/{productId}")
+	public ResponseEntity<?> updateCartByProductId(
+			@PathVariable Long productId,
+			@RequestBody Map<String, Object> request) {
 
-	@PutMapping("/carts")
-	public Object updateCart(@RequestBody Map<String, Object> request) {
 		User user = Lib.getRequestingUser(request, userRepository);
 		if (user == null) {
-			return Lib.userRestResponse;
+			return Lib.userRestResponseErr;
 		}
 
-		// Check if the cart exists; if not, create a new one
-		Cart cart = cartRepository.findByUser(user).orElse(new Cart(user));
-
-		// Extract items list from request
-		List<Map<String, Object>> items = (List<Map<String, Object>>) request.get("items");
-		if (items == null) {
-			return Lib.RestBadRequest("No items provided");
+		Integer changeNumber = (Integer) request.get("changeNumber");
+		if (changeNumber == null) {
+			changeNumber = 1; // Default change number, could be positive or negative
 		}
 
-		// Clear existing items if any
-		cart.getItems().clear();
+		// Fetch or create a cart for the user
+		Cart cart = cartRepository.findByUser(user);
+		if (cart == null) {
+			cart = new Cart(user);			
+		}
 
-		// Add new items or update existing ones
-		for (Map<String, Object> itemData : items) {
-			Long productId = ((Number) itemData.get("productId")).longValue();
-			Integer quantity = (Integer) itemData.get("quantity");
+		// Check if the product exists in the cart
+		Optional<CartItem> cartItemOpt = cart.getItems().stream()
+				.filter(item -> item.getProduct().getProductId().equals(productId))
+				.findFirst();
 
-			Product product = productRepository.findById(productId).orElse(null);
-			if (product == null) {
-				return Lib.RestBadRequest("Invalid product ID: " + productId);
+		if (cartItemOpt.isPresent()) {
+			CartItem cartItem = cartItemOpt.get();
+			int updatedQuantity = cartItem.getQuantity() + changeNumber;
+
+			if (updatedQuantity <= 0) {
+				cart.getItems().remove(cartItem);
+			} else {
+				cartItem.setQuantity(updatedQuantity);
+			}
+			cartRepository.save(cart);
+			return ResponseEntity.ok(cart);
+		}
+		
+		// if the product is not available in the cart then change number is the quantity
+		if (changeNumber > 0) {
+			Optional<Product> productOpt = productRepository.findById(productId);
+			if (productOpt.isEmpty()) {
+				return Lib.RestBadRequest("Product with ID " + productId + " not found");
 			}
 
-			// Add item to cart
-			CartItem cartItem = new CartItem(cart, product, quantity);
-			cart.getItems().add(cartItem);
-		}
-
+			Product product = productOpt.get();
+			// Add the new item to the cart
+			CartItem newCartItem = new CartItem(cart, product, changeNumber);
+			cart.getItems().add(newCartItem);
+			cartRepository.save(cart);
+			return ResponseEntity.ok(cart);
+		} 
+		// reduce a non-exist product to 0 does not change anything of the cart
 		cartRepository.save(cart);
 		return ResponseEntity.ok(cart);
 	}

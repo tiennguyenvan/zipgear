@@ -15,7 +15,7 @@ import com.example.demo.repository.UserRepository;
 public class Lib {
 	private static final Map<String, String> validationCodes = new ConcurrentHashMap<>();
 	private static final Map<String, String> activeSessions = new ConcurrentHashMap<>();
-	public static ResponseEntity<?> userRestResponse = null;
+	public static ResponseEntity<?> userRestResponseErr = null;
 
 	@Autowired
 	private static UserRepository userRepository;
@@ -60,23 +60,23 @@ public class Lib {
 	public static User getRequestingUser(String email, String code, UserRepository userRepository) {
 		// Step 1: Check if email and code are provided
 		if (email == null) {
-			userRestResponse = RestBadRequest("Email is required.");
+			userRestResponseErr = RestBadRequest("Email is required.");
 			return null;
 		}
 		if (!Env.IS_DEVELOPING) {
 			if (code == null) {
-				userRestResponse = RestBadRequest("Code is required.");
+				userRestResponseErr = RestBadRequest("Code is required.");
 				return null;
 			}
 			if (!isSessionValid(email, code)) {
-				userRestResponse = RestUnauthorized("Session expired. Please login again.");
+				userRestResponseErr = RestUnauthorized("Session expired. Please login again.");
 				return null;
 			}
 		}
 
 		User user = userRepository.findByEmail(email);
 		if (user == null) {
-			userRestResponse = RestNotFound("User not found.");
+			userRestResponseErr = RestNotFound("User not found.");
 			return null;
 		}
 
@@ -87,7 +87,7 @@ public class Lib {
 		validationCodes.put(email, code);
 	}
 
-	public static boolean verifyValidationCode(String email, String code) {
+	public static boolean isVerifyValidationCodeSuccess(String email, String code) {
 		return code != null && code.equals(validationCodes.get(email));
 	}
 

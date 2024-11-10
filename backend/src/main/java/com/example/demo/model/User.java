@@ -2,7 +2,10 @@ package com.example.demo.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "users", uniqueConstraints = @UniqueConstraint(columnNames = "email")) // Ensure email is unique
@@ -21,6 +24,13 @@ public class User {
 	@CollectionTable(name = "user_addresses", joinColumns = @JoinColumn(name = "user_id"))
 	@Column(name = "addresses")
 	private List<String> addresses;
+
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)	
+	@JsonIgnore
+    private List<Rating> ratings = new ArrayList<>();
+
+	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)	
+	private Cart cart;
 
 	@Column(nullable = false, updatable = false)
 	private LocalDateTime createdAt;

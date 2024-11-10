@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 public class Rating {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long ratingId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
@@ -47,12 +47,12 @@ public class Rating {
     }
 
     // Getters and Setters
-    public Long getId() {
-        return id;
+    public Long getRatingId() {
+        return ratingId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setRatingId(Long id) {
+        this.ratingId = id;
     }
 
     public Product getProduct() {

@@ -8,14 +8,12 @@ import com.example.demo.repository.UserRepository;
 import com.example.demo.repository.ProductRepository;
 import com.example.demo.service.Lib;
 
-import org.eclipse.angus.mail.imap.Rights.Right;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
@@ -71,7 +69,7 @@ public class RatingController {
 		}
 		User user = Lib.getRequestingUser(request, userRepository);
 		if (user == null) {
-			return Lib.userRestResponse;
+			return Lib.userRestResponseErr;
 		}
 
 		Integer ratingStars = (Integer) request.get("ratingStars");
@@ -90,7 +88,7 @@ public class RatingController {
 		}
 		User user = Lib.getRequestingUser(request, userRepository);
 		if (user == null) {
-			return Lib.userRestResponse;
+			return Lib.userRestResponseErr;
 		}
 
 		Integer ratingStars = (Integer) request.get("ratingStars");
@@ -117,7 +115,7 @@ public class RatingController {
 		}
 		User user = Lib.getRequestingUser(request, userRepository);
 		if (user == null) {
-			return Lib.userRestResponse;
+			return Lib.userRestResponseErr;
 		}
 
 		List<Rating> ratings = ratingRepository.findByUserAndProduct(user, product);

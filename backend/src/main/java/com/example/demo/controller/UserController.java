@@ -6,14 +6,11 @@ import com.example.demo.service.EmailService;
 import com.example.demo.service.Env;
 import com.example.demo.service.Lib;
 
-import org.eclipse.angus.mail.handlers.message_rfc822;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,8 +26,6 @@ public class UserController {
 	private UserRepository userRepository;
 
 	// Store validation codes temporarily (In-memory storage)
-	private final Map<String, String> validationCodes = new ConcurrentHashMap<>();
-	private final Map<String, String> activeSessions = new ConcurrentHashMap<>();
 
 	// POST api/user/request-code
 	@PostMapping("/users/request-code")
@@ -70,10 +65,8 @@ public class UserController {
 			return Lib.RestBadRequest("Email and code are required.");
 		}
 
-		if (!Env.IS_DEVELOPING) {
-			String storedCode = validationCodes.get(email);
-
-			if (storedCode == null || !storedCode.equals(code)) {
+		if (!Env.IS_DEVELOPING) {			
+			if (!Lib.isVerifyValidationCodeSuccess(email, code)) {
 				return Lib.RestUnauthorized("Invalid validation code.");
 			}
 		}
@@ -97,7 +90,7 @@ public class UserController {
 			@RequestParam(required = false) List<String> fields) {
 		User requestingUser = Lib.getRequestingUser(email, code, userRepository);
 		if (requestingUser == null) {
-			return Lib.userRestResponse;
+			return Lib.userRestResponseErr;
 		}
 
 		// Step 3: Return all data if no fields are specified
@@ -141,7 +134,7 @@ public class UserController {
 
 		User existingUser = (User) Lib.getRequestingUser(request, userRepository);
 		if (existingUser == null) {
-			return Lib.userRestResponse;
+			return Lib.userRestResponseErr;
 		}
 
 		// Validate addresses
