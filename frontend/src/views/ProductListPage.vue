@@ -5,11 +5,16 @@
     <div class="card flex wrapper">
       <div class="products main">
         <div v-for="product in products" :key="product.id" class="product-card">
-          <img :src="product.image" :alt="product.name" class="product-image" />
-          <p class="product-price">{{ product.price }}</p>
-          <h3 class="product-name">{{ product.name }}</h3>
+          <img
+            :src="product.imageSrcs[0]"
+            :alt="product.name"
+            class="product-image"
+          />
+          <p class="product-price">${{ product.price }}</p>
+          <h3 class="product-name">{{ product.title }}</h3>
+         
+          <p class="product-rating">{{ product.averageRating }} ★</p>
           <a href="#" class="add-to-cart">Add to Cart</a>
-          <p class="product-rating">{{ product.rating }}</p>
         </div>
       </div>
 
@@ -131,6 +136,7 @@
 </template>
 
 <script>
+import axios from "axios";
 import NavBar from "@/components/NavBar.vue";
 import Env from "@/utils/Env";
 
@@ -143,104 +149,7 @@ export default {
     return {
       adminEmail: Env.ADMIN_EMAIL,
       // Products JSON data
-      products: [
-        {
-          id: 1,
-          name: "zPhone 10",
-          price: "$1,300",
-          image: require("@/assets/img/image.png"),
-          rating: "4.2★",
-          addToCartText: "Add to Cart",
-        },
-        {
-          id: 2,
-          name: "zNote W8",
-          price: "$2,700",
-          image: require("@/assets/img/image.png"),
-          rating: "4.5★",
-          addToCartText: "Add to Cart",
-        },
-        {
-          id: 3,
-          name: "zBook M5",
-          price: "$4,700",
-          image: require("@/assets/img/image.png"),
-          rating: "4.8★",
-          addToCartText: "Add to Cart",
-        },
-        {
-          id: 4,
-          name: "zBook M5",
-          price: "$4,700",
-          image: require("@/assets/img/image.png"),
-          rating: "4.8★",
-          addToCartText: "Add to Cart",
-        },
-        {
-          id: 5,
-          name: "zHeadphone OV9",
-          price: "$1,300",
-          image: require("@/assets/img/image.png"),
-          rating: "4.4★",
-          addToCartText: "Add to Cart",
-        },
-        {
-          id: 6,
-          name: "zNote W8",
-          price: "$2,700",
-          image: require("@/assets/img/image.png"),
-          rating: "4.5★",
-          addToCartText: "Add to Cart",
-        },
-        {
-          id: 6,
-          name: "zNote W8",
-          price: "$2,700",
-          image: require("@/assets/img/image.png"),
-          rating: "4.5★",
-          addToCartText: "Add to Cart",
-        },
-        {
-          id: 6,
-          name: "zNote W8",
-          price: "$2,700",
-          image: require("@/assets/img/image.png"),
-          rating: "4.5★",
-          addToCartText: "Add to Cart",
-        },
-        {
-          id: 6,
-          name: "zNote W8",
-          price: "$2,700",
-          image: require("@/assets/img/image.png"),
-          rating: "4.5★",
-          addToCartText: "Add to Cart",
-        },
-        {
-          id: 6,
-          name: "zNote W8",
-          price: "$2,700",
-          image: require("@/assets/img/image.png"),
-          rating: "4.5★",
-          addToCartText: "Add to Cart",
-        },
-        {
-          id: 6,
-          name: "zNote W8",
-          price: "$2,700",
-          image: require("@/assets/img/image.png"),
-          rating: "4.5★",
-          addToCartText: "Add to Cart",
-        },
-        {
-          id: 6,
-          name: "zNote W8",
-          price: "$2,700",
-          image: require("@/assets/img/image.png"),
-          rating: "4.5★",
-          addToCartText: "Add to Cart",
-        },
-      ],
+      products: [],
       filters: {
         keyword: "",
         priceSort: "all",
@@ -254,17 +163,73 @@ export default {
     };
   },
   mounted() {
-    console.log(process.env);
+    this.fetchProducts();
   },
   methods: {
+    async fetchProducts() {
+      // Build query parameters based on filters
+      let params = {
+        keyword: this.filters.keyword || undefined,
+        priceOrder:
+          this.filters.priceSort === "high"
+            ? "desc"
+            : this.filters.priceSort === "low"
+            ? "asc"
+            : undefined,
+        ratingOrder:
+          this.filters.ratingSort === "high"
+            ? "desc"
+            : this.filters.ratingSort === "low"
+            ? "asc"
+            : undefined,
+        minPrice: this.filters.minPrice || undefined,
+        maxPrice: this.filters.maxPrice || undefined,
+        minRating: this.filters.minRating || undefined,
+        maxRating: this.filters.maxRating || undefined,
+        inStock:
+          this.filters.stock === "in"
+            ? true
+            : this.filters.stock === "out"
+            ? false
+            : undefined,
+      };
+
+      try {
+        // Make the GET request with query parameters
+        const response = await axios.get("http://localhost:8080/api/products", {
+          params,
+        });
+
+        const productIds = response.data.map((product) => product.productId);
+
+        // Fetch each product by ID
+        const productsData = await Promise.all(
+          productIds.map(async (id) => {
+            const productResponse = await axios.get(
+              `http://localhost:8080/api/products/${id}`
+            );
+            return productResponse.data;
+          })
+        );
+
+        // Set the fetched products to the products data property
+        this.products = productsData;
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    },
+
     sortPrice(order) {
       this.filters.priceSort = order;
+      this.fetchProducts();
     },
     sortRating(order) {
       this.filters.ratingSort = order;
+      this.fetchProducts();
     },
     setStock(status) {
       this.filters.stock = status;
+      this.fetchProducts();
     },
     clearFilters() {
       this.filters = {
@@ -277,6 +242,7 @@ export default {
         maxRating: null,
         stock: "all",
       };
+      this.fetchProducts();
     },
     validateNonNegative(field) {
       if (this.filters[field] < 0) {
