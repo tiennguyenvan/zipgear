@@ -19,6 +19,8 @@
 					</div>
 					<button class="add-rating-btn">Add Your Rating</button>
 				</div>
+				<!-- Integrate RatingComponent -->
+				<RatingComponent :productId="productId" :isLoggedIn="isLoggedIn" />
 			</div>
 		</div>
 	</div>
@@ -26,40 +28,43 @@
 
 <script>
 import NavBar from '@/components/NavBar.vue';
+import RatingComponent from '@/components/RatingComponent.vue';
 
 export default {
 	name: 'ProductDetailPage',
 	components: {
 		NavBar,
+		RatingComponent
 	},
-	props: ['id'], 
-    data() {
-        return {
-            productId: null, // Holds the id parameter
-            productDetails: {}, // Holds the product details (fetched data)
-        };
-    },
-    created() {
-        // Get the route parameter
-        this.productId = this.$route.params.id;
+	props: ['id'],
+	data() {
+		return {
+			productId: this.$route.params.id,
+			isLoggedIn: true, // Assume user login status is managed here
+			productDetails: {} // Holds the product details (fetched data)
+		};
+	},
+	created() {
+		// Get the route parameter
+		this.productId = this.$route.params.id;
 
-        // Example: Fetch product details based on the id
-        this.fetchProductDetails(this.productId);
-    },
-    methods: {
-        fetchProductDetails(id) {
-            // Placeholder for an API call to fetch product details by id
-            // Replace this with your actual API call logic
-            console.log(`Fetching details for product ID: ${id}`);
-            // Example: Simulate fetching data
-            this.productDetails = {
-                id: id,
-                name: "Sample Product",
-                description: "This is a sample product description.",
-                // Add more fields as needed
-            };
-        }
-    }
+		// Fetch product details based on the id
+		this.fetchProductDetails(this.productId);
+	},
+	methods: {
+		fetchProductDetails(id) {
+			// Placeholder for an API call to fetch product details by id
+			// Replace this with your actual API call logic
+			console.log(`Fetching details for product ID: ${id}`);
+			// Example: Simulate fetching data
+			this.productDetails = {
+				id: id,
+				name: "Sample Product",
+				description: "This is a sample product description.",
+				// Add more fields as needed
+			};
+		}
+	}
 };
 </script>
 
