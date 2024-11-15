@@ -6,13 +6,23 @@
 			<!-- Product List -->
 			<div class="product-list main">
 				<div v-for="product in products" :key="product.productId" class="product-item">
-					<img :src="product.imageSrcs[0]" :alt="product.title" class="image" />
-					<p class="price ">${{ product.price }}</p>
-					<h3 class="name">{{ product.title }}</h3>
-					<a href="#" class="action add-to-cart">Add to Cart</a>
-					<p class="rating">{{ product.averageRating }}★</p>
+					<!-- This router-link navigates to the detail page -->
+					<router-link :to="{ name: 'product-detail', params: { id: product.productId } }"
+						class="product-info">
+						<img :src="product.imageSrcs[0]" :alt="product.title" class="image" />
+						<p class="meta">
+							<span class="price ">${{ product.price }}</span>
+							<span class="rating">{{ product.averageRating }}★</span>
+						</p>
+						<h3 class="name">{{ product.title }}</h3>
+					</router-link>
+
+					<!-- Add to Cart button outside of router-link to avoid navigation -->
+					<button class="action add-to-cart" @click="addToCart(product)">Add to Cart</button>
 				</div>
 			</div>
+
+
 
 			<!-- Filter Sidebar -->
 			<div class="sidebar">
@@ -33,8 +43,10 @@
 								First</button>
 						</div>
 						<div class="range-inputs price-filters">
-							<input type="number" v-model="filters.minPrice" placeholder="Min" @input="onFilterChange" min="1"/>
-							<input type="number" v-model="filters.maxPrice" placeholder="Max" @input="onFilterChange" min="1"/>
+							<input type="number" v-model="filters.minPrice" placeholder="Min" @input="onFilterChange"
+								min="1" />
+							<input type="number" v-model="filters.maxPrice" placeholder="Max" @input="onFilterChange"
+								min="1" />
 						</div>
 					</div>
 
@@ -51,10 +63,10 @@
 								First</button>
 						</div>
 						<div class="range-inputs rating-filters">
-							<input type="number" v-model="filters.minRating" placeholder="Min"
-								@input="onFilterChange" min="1" />
-							<input type="number" v-model="filters.maxRating" placeholder="Max"
-								@input="onFilterChange" min="1"/>
+							<input type="number" v-model="filters.minRating" placeholder="Min" @input="onFilterChange"
+								min="1" />
+							<input type="number" v-model="filters.maxRating" placeholder="Max" @input="onFilterChange"
+								min="1" />
 						</div>
 					</div>
 
@@ -161,6 +173,11 @@ export default {
 			};
 			this.fetchProducts();
 		},
+		addToCart(product) {
+
+			// Your logic to add the product to the cart
+			console.log("Adding to cart:", product);
+		}
 	},
 };
 </script>
@@ -168,20 +185,13 @@ export default {
 
 <style scoped lang="scss">
 .product-list {
-	display: flex;
-	flex-wrap: wrap;
-	/* Allows items to wrap to the next line */
-	justify-content: center;
-	/* Centers items horizontally */
-	gap: 20px;
-	/* Space between cards */
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 50px 40px;
 
 	.product-item {
-		text-align: center;
-		width: 200px;
-		margin: 10px;
-
-		/* Optional: Space around each card */
+		text-align: center;		
+		
 		&:hover {
 			transform: scale(1.05);
 		}
@@ -192,26 +202,36 @@ export default {
 			border-radius: 8px;
 		}
 
-		.price {
-			font-size: 14px;
-			font-weight: bold;
-			color: var(--light-text-color);
-			margin-top: 20px;
-			margin-bottom: 0px;
+		.meta {
+			display: flex;
+			gap: 1em;
+			justify-content: center;
+			align-items: center;
+			margin: 1em 0 0 0;
+			.price {
+				font-size: 14px;
+				font-weight: bold;
+				color: var(--light-text-color);								
+			}
+
+			.rating {
+				font-size: 14px;
+				color: var(--light-text-color);				
+			}
 		}
 
 		.name {
+			margin: 0.3em 0 0.8em 0;
 			font-size: 16px;
-			font-weight: bold;
-			margin-top: 5px;
-			margin-bottom: 10px;
+			font-weight: bold;			
+		}
+		.action {
+			border: none;
+			padding: 0;
+			background: none;
 		}
 
-		.rating {
-			font-size: 14px;
-			color: var(--light-text-color);
-			margin-top: 5px;
-		}
+
 
 	}
 }
@@ -254,7 +274,7 @@ export default {
 
 
 			.range-inputs {
-				display: flex;				
+				display: flex;
 				margin-top: 15px;
 
 				input:first-child {
@@ -262,6 +282,7 @@ export default {
 					border-top-right-radius: 0;
 					border-bottom-right-radius: 0;
 				}
+
 				input:last-child {
 					border-top-left-radius: 0;
 					border-bottom-left-radius: 0;

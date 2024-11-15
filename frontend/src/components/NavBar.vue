@@ -17,7 +17,7 @@
 			</li>
 			<li>
 				<router-link to="/checkout" class="cart">
-					Checkout <span class="count">(0)</span>
+					Cart <strong class="count">(0)</strong>
 				</router-link>
 			</li>
 		</ul>

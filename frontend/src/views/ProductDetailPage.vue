@@ -1,30 +1,26 @@
 <template>
 	<div class="wide">
 		<NavBar />
-		<div class="product-detail-container">
-			<div class="image">
-				<img :src="selectedImage" alt="Product Image" class="main-image" />
-				<div class="thumbnail-container">
-					<img v-for="(image, index) in productDetails.images" :key="index" :src="image"
-						:class="{ 'active-thumbnail': selectedImage === image }" @click="selectImage(image)"
+		<div class="card flex wrapper product-details">
+			<div class="main flex feature-image-wrapper">
+				<img :src="selectedFeatureImage" alt="Product Feature Image" class="feature-image" />
+				<div class="flex thumbnail-wrapper">
+					<img v-for="(image, index) in productDetails.imageSrcs" :key="index" :src="image"
+						:class="{ 'active-thumbnail': selectedFeatureImage === image }" @click="selectImage(image)"
 						class="thumbnail" alt="Thumbnail" />
 				</div>
 			</div>
-			<div class="product-info">
-				<!-- <h2>Open Box - Apple MacBook Air (2022) 13.6” w/ Touch ID (2022) - Midnight</h2>
-				<p class="price">$1,199.77</p>
-				<p class="description">
-					The new MacBook Air is powered by the Apple M2 chip, which provides enhanced performance, battery life, and more.
-				</p> -->
-				<h2 class="name">{{ productDetails.name }}</h2>
-				<p class="price">{{ productDetails.price }}</p>
+			<div class="sidebar flex product-info">
+				<h2 class="name">{{ productDetails.title }}</h2>
+				<p class="price">${{ productDetails.price }}</p>
 				<p class="description">{{ productDetails.description }}</p>
-				<button class="add-to-cart-btn">Add to Cart</button>
+				<button class="primary-btn add-to-cart">Add to Cart</button>
 
 				<!-- Ratings and Reviews Section -->
 				<div class="rating">
-					<p class="rating-score">{{ productDetails.rating }}★ / <span class="rating-length">{{
-						productDetails.reviews.length }} ratings</span>
+					<p class="rating-score">
+						{{ productDetails.averageRating }}★ / <span class="rating-length">{{
+							productDetails.reviews?.length || 0 }} ratings</span>
 					</p>
 					<div class="reviews">
 						<div v-for="(review, index) in productDetails.reviews" :key="index" class="user-review">
@@ -56,19 +52,20 @@
 </template>
 
 <script>
+import axios from 'axios';
 import NavBar from '@/components/NavBar.vue';
+import Env from '@/utils/Env';
 
 export default {
 	name: 'ProductDetailPage',
 	components: {
 		NavBar,
 	},
-	props: ['id'],
 	data() {
 		return {
-			productId: null, // Holds the id parameter
-			productDetails: {}, // Holds the product details (fetched data)
-			selectedImage: '', // Holds the selected image for the product
+			productId: null,
+			productDetails: {},
+			selectedFeatureImage: '',
 			newReview: {
 				comment: '',
 				rating: 0,
@@ -77,133 +74,26 @@ export default {
 		};
 	},
 	created() {
-		// Get the route parameter
-		this.productId = this.$route.params.id;
-		// Example: Fetch product details based on the id
-		this.fetchProductDetails(this.productId);
+		this.productId = this.$route.params.id; // Get the product ID from the route parameter
+		this.fetchProductDetails(this.productId); // Fetch product details
 	},
 	methods: {
-		fetchProductDetails(id) {
-			// // Placeholder for an API call to fetch product details by id
-			// // Replace this with your actual API call logic
-			// console.log(`Fetching details for product ID: ${id}`);
-			// // Example: Simulate fetching data
-			// this.productDetails = {
-			//     id: id,
-			//     name: "Sample Product",
-			//     description: "This is a sample product description.",
-			//     // Add more fields as needed
-			// };
-			const products = [
-				{
-					id: 1,
-					name: "zPhone 10",
-					price: "$1,300",
-					description: "High-performance smartphone with advanced features.",
-					images: [
-						require('@/assets/img/image.png'),
-						require('@/assets/img/image2.jpeg'),
-						require('@/assets/img/image3.jpeg')
-					],
-					rating: 4.2,
-					reviews: [
-						{ name: "Tim Nguyen", rating: 5, comment: "Excellent product with great value!" },
-						{ name: "Jane Doe", rating: 4, comment: "Good quality, but a bit pricey." }
-					]
-				},
-				{
-					id: 2,
-					name: "zNote W8",
-					price: "$2,700",
-					description: "High-performance tablet with sleek design.",
-					images: [
-						require('@/assets/img/image.png'),
-						require('@/assets/img/image2.jpeg'),
-						require('@/assets/img/image3.jpeg')
-					],
-					rating: 4.5,
-					reviews: [
-						{ name: "Alice", rating: 4, comment: "Solid performance and design." },
-						{ name: "Bob", rating: 5, comment: "Best tablet I’ve owned." }
-					]
-				},
-				{
-					id: 3,
-					name: "zBook M5",
-					price: "$4,700",
-					images: [
-						require('@/assets/img/image.png'),
-						require('@/assets/img/image2.jpeg'),
-						require('@/assets/img/image3.jpeg')
-					],
-					rating: 4.5,
-					reviews: [
-						{ name: "Alice", rating: 4, comment: "Solid performance and design." },
-						{ name: "Bob", rating: 5, comment: "Best tablet I’ve owned." }
-					]
-				},
-				{
-					id: 4,
-					name: "zBook M5",
-					price: "$4,700",
-					images: [
-						require('@/assets/img/image.png'),
-						require('@/assets/img/image2.jpeg'),
-						require('@/assets/img/image3.jpeg')
-					],
-					rating: 4.5,
-					reviews: [
-						{ name: "Alice", rating: 4, comment: "Solid performance and design." },
-						{ name: "Bob", rating: 5, comment: "Best tablet I’ve owned." }
-					]
-				},
-				{
-					id: 5,
-					name: "zHeadphone OV9",
-					price: "$1,300",
-					images: [
-						require('@/assets/img/image.png'),
-						require('@/assets/img/image2.jpeg'),
-						require('@/assets/img/image3.jpeg')
-					],
-					rating: 4.5,
-					reviews: [
-						{ name: "Alice", rating: 4, comment: "Solid performance and design." },
-						{ name: "Bob", rating: 5, comment: "Best tablet I’ve owned." }
-					]
-				},
-				{
-					id: 6,
-					name: "zNote W8",
-					price: "$2,700",
-					images: [
-						require('@/assets/img/image.png'),
-						require('@/assets/img/image2.jpeg'),
-						require('@/assets/img/image3.jpeg')
-					],
-					rating: 4.5,
-					reviews: [
-						{ name: "Alice", rating: 4, comment: "Solid performance and design." },
-						{ name: "Bob", rating: 5, comment: "Best tablet I’ve owned." }
-					]
-				}
-			];
-
-			// Find the product by ID and set `productDetails`
-			const product = products.find(p => p.id === parseInt(id));
-			if (product) {
-				this.productDetails = product;
-				this.selectedImage = product.images[0]; // Set initial main image to the first one
-				console.log("Product Details:", this.productDetails);
-				console.log("Images:", this.productDetails.images); // Check if images array is correctly set
+		async fetchProductDetails(id) {
+			try {
+				const response = await axios.get(`${Env.API_BASE_URL}/products/${id}`);
+				this.productDetails = response.data;
+				this.selectedFeatureImage = this.productDetails.imageSrcs[0]; // Set initial image
+			} catch (error) {
+				console.error("Error fetching product details:", error);
 			}
 		},
 		selectImage(image) {
-			this.selectedImage = image; // Update main image when a thumbnail is clicked
+			this.selectedFeatureImage = image; // Update the main image on thumbnail click
 		},
 		submitReview() {
 			if (this.newReview.comment.trim() && this.newReview.rating > 0) {
 				this.productDetails.reviews.push({
+					name: this.newReview.user,
 					rating: this.newReview.rating,
 					comment: this.newReview.comment.trim()
 				});
@@ -211,105 +101,80 @@ export default {
 				this.newReview.rating = 0;
 			}
 		}
-
 	}
-
 };
 </script>
 
 <style scoped lang="scss">
-.product-detail-container {
-	display: flex;
-	background-color: var(--white-bg-color);
-	border-radius: 8px;
-	// padding: 2em;
-	gap: 2em;
-	align-items: stretch; /* Make both sections stretch to the same height */
+.product-details {
 
-	.image {
+	.feature-image-wrapper {
 		flex: 2;
-		padding: 2em;
-		display: flex;
+		padding: 3em;
 		flex-direction: column;
-		align-items: center;
-		background-color: #f9f9f9; /* Light gray background */
-		margin-right: var(--spacing-element);
-		justify-content: center; /* Center content vertically */
+		gap: 1em;
 
 		img {
-			gap: 2em;
 			width: 100%;
-
 		}
 
-		.thumbnail-container {
-			display: flex;
-			gap: 8px;
-			justify-content: center;
-			/* Centers the thumbnails horizontally */
-			margin-top: 10px;
+		.thumbnail-wrapper {
+			gap: 1em;
 
 			.thumbnail {
 				width: 50px;
 				height: 50px;
-				border: 1px solid var(--border-color);
+				// padding: 0.3em;
+				border: 2px solid var(--border-color);
 				border-radius: 4px;
 				cursor: pointer;
 
 				&:hover {
+					border-color: var(--light-text-color);
+				}
+
+				&.active-thumbnail {
 					border-color: var(--primary-color);
+
+					&:hover {
+						border-color: var(--primary-color);
+					}
 				}
 			}
 
-			.active-thumbnail {
-				border-color: var(--primary-color);
-			}
 		}
 	}
 
 	.product-info {
-		padding: 2em;
+		padding: 3em;
 		flex: 1;
-		display: flex;
 		flex-direction: column;
-		gap: var(--spacing-element-small);
-		margin-right: var(--spacing-element);
-		background-color: var(--white-bg-color); /* Ensure it stays white */
-		-name {
-			gap: 2em;
-			font-size: var(--font-size-title);
-			font-weight: var(--font-weight-title);
-			margin-bottom: var(--spacing-element-small);
+		gap: 1em;
+		align-items: start;
+		justify-content: start;
+
+		.name {
+			margin: 0;
 		}
 
 		.price {
-			font-size: 1.5em;
+			font-size: 2.5em;
 			color: var(--success-color);
-			font-weight: var(--font-weight-button);
+			font-weight: 300;
+			margin: 0.5em 0;
 		}
 
 		.description {
 			color: #666;
 			font-size: 1em;
+			margin: 0;
 		}
 
-		.add-to-cart-btn {
-			background-color: var(--primary-color);
-			color: var(--white-bg-color);
-			padding: var(--padding-button);
-			border: none;
-			border-radius: var(--border-radius);
-			cursor: pointer;
-			text-align: center;
-			font-size: var(--font-size-button);
-			font-weight: var(--font-weight-button);
-			margin-top: var(--spacing-element);
+		.add-to-cart {
+			padding: 20px;
+			font-size: 16px;
+			margin: 0.5em 0 0 0;
 			width: 100%;
-			
-		}
-
-		.add-to-cart-btn:hover {
-			background-color: var(--secondary-color);
 		}
 
 		/* Rating Section */
