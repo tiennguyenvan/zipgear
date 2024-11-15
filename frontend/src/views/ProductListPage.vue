@@ -3,79 +3,75 @@
 		<NavBar />
 
 		<div class="card flex wrapper">
-			<div class="products main">
-				<div v-for="product in products" :key="product.id" class="product-card">
-					<img :src="product.image" :alt="product.name" class="product-image" />
-					<p class="product-price">{{ product.price }}</p>
-					<h3 class="product-name">{{ product.name }}</h3>
-					<a href="#" class="add-to-cart">Add to Cart</a>
-					<p class="product-rating">{{ product.rating }}</p>
+			<!-- Product List -->
+			<div class="product-list main">
+				<div v-for="product in products" :key="product.productId" class="product-item">
+					<img :src="product.imageSrcs[0]" :alt="product.title" class="image" />
+					<p class="price ">${{ product.price }}</p>
+					<h3 class="name">{{ product.title }}</h3>
+					<a href="#" class="action add-to-cart">Add to Cart</a>
+					<p class="rating">{{ product.averageRating }}★</p>
 				</div>
 			</div>
 
+			<!-- Filter Sidebar -->
 			<div class="sidebar">
 				<div class="product-filters">
 					<!-- Search Keywords -->
-					<input type="text" v-model="filters.keyword" placeholder="Search Keywords" class="search-input" />
+					<input type="text" v-model="filters.keyword" placeholder="Search Keywords" class="search-input"
+						@input="onFilterChange" />
 
 					<!-- Price Filter -->
 					<div class="filter-group">
-						<label>Price:</label>
-						<button @click="sortPrice('all')" :class="{ active: filters.priceSort === 'all' }">
-							All
-						</button>
-						<button @click="sortPrice('high')" :class="{ active: filters.priceSort === 'high' }">
-							High First
-						</button>
-						<button @click="sortPrice('low')" :class="{ active: filters.priceSort === 'low' }">
-							Low First
-						</button>
-						<div class="range-inputs">
-							<input type="number" v-model="filters.minPrice" placeholder="Min"
-								@input="validateNonNegative('minPrice')" />
-							<input type="number" v-model="filters.maxPrice" placeholder="Max"
-								@input="validateNonNegative('maxPrice')" />
+						<div class="flex action-links">
+							<label>Price:</label>
+							<button @click="sortPrice('all')"
+								:class="{ active: filters.priceSort === 'all' }">All</button>
+							<button @click="sortPrice('high')" :class="{ active: filters.priceSort === 'high' }">High
+								First</button>
+							<button @click="sortPrice('low')" :class="{ active: filters.priceSort === 'low' }">Low
+								First</button>
+						</div>
+						<div class="range-inputs price-filters">
+							<input type="number" v-model="filters.minPrice" placeholder="Min" @input="onFilterChange" min="1"/>
+							<input type="number" v-model="filters.maxPrice" placeholder="Max" @input="onFilterChange" min="1"/>
 						</div>
 					</div>
 
+
 					<!-- Rating Filter -->
 					<div class="filter-group">
-						<label>Rating:</label>
-						<button @click="sortRating('all')" :class="{ active: filters.ratingSort === 'all' }">
-							All
-						</button>
-						<button @click="sortRating('high')" :class="{ active: filters.ratingSort === 'high' }">
-							High First
-						</button>
-						<button @click="sortRating('low')" :class="{ active: filters.ratingSort === 'low' }">
-							Low First
-						</button>
-						<div class="range-inputs">
+						<div class="flex action-links">
+							<label>Rating:</label>
+							<button @click="sortRating('all')"
+								:class="{ active: filters.ratingSort === 'all' }">All</button>
+							<button @click="sortRating('high')" :class="{ active: filters.ratingSort === 'high' }">High
+								First</button>
+							<button @click="sortRating('low')" :class="{ active: filters.ratingSort === 'low' }">Low
+								First</button>
+						</div>
+						<div class="range-inputs rating-filters">
 							<input type="number" v-model="filters.minRating" placeholder="Min"
-								@input="validateNonNegative('minRating')" />
+								@input="onFilterChange" min="1" />
 							<input type="number" v-model="filters.maxRating" placeholder="Max"
-								@input="validateNonNegative('maxRating')" />
+								@input="onFilterChange" min="1"/>
 						</div>
 					</div>
 
 					<!-- Stock Filter -->
 					<div class="filter-group">
-						<label>Stock:</label>
-						<button @click="setStock('all')" :class="{ active: filters.stock === 'all' }">
-							All
-						</button>
-						<button @click="setStock('in')" :class="{ active: filters.stock === 'in' }">
-							In-Stock
-						</button>
-						<button @click="setStock('out')" :class="{ active: filters.stock === 'out' }">
-							Out-Stock
-						</button>
+						<div class="flex action-links">
+							<label>Stock:</label>
+							<button @click="setStock('all')" :class="{ active: filters.stock === 'all' }">All</button>
+							<button @click="setStock('in')"
+								:class="{ active: filters.stock === 'in' }">In-Stock</button>
+							<button @click="setStock('out')"
+								:class="{ active: filters.stock === 'out' }">Out-Stock</button>
+						</div>
 					</div>
 
 					<!-- Clear Filters Button -->
-					<button @click="clearFilters" class="clear-button">
-						Clear All Filters
-					</button>
+					<button @click="clearFilters" class="clear-filter-button">Clear All Filters</button>
 				</div>
 			</div>
 		</div>
@@ -83,116 +79,17 @@
 </template>
 
 <script>
+import axios from "axios";
 import NavBar from "@/components/NavBar.vue";
 import Env from "@/utils/Env";
+import debounce from "lodash/debounce";
 
 export default {
 	name: "ProductListPage",
-	components: {
-		NavBar,
-	},
+	components: { NavBar },
 	data() {
 		return {
-			adminEmail: Env.ADMIN_EMAIL,
-			// Products JSON data
-			products: [
-				{
-					id: 1,
-					name: "zPhone 10",
-					price: "$1,300",
-					image: require("@/assets/img/image.png"),
-					rating: "4.2★",
-					addToCartText: "Add to Cart",
-				},
-				{
-					id: 2,
-					name: "zNote W8",
-					price: "$2,700",
-					image: require("@/assets/img/image.png"),
-					rating: "4.5★",
-					addToCartText: "Add to Cart",
-				},
-				{
-					id: 3,
-					name: "zBook M5",
-					price: "$4,700",
-					image: require("@/assets/img/image.png"),
-					rating: "4.8★",
-					addToCartText: "Add to Cart",
-				},
-				{
-					id: 4,
-					name: "zBook M5",
-					price: "$4,700",
-					image: require("@/assets/img/image.png"),
-					rating: "4.8★",
-					addToCartText: "Add to Cart",
-				},
-				{
-					id: 5,
-					name: "zHeadphone OV9",
-					price: "$1,300",
-					image: require("@/assets/img/image.png"),
-					rating: "4.4★",
-					addToCartText: "Add to Cart",
-				},
-				{
-					id: 6,
-					name: "zNote W8",
-					price: "$2,700",
-					image: require("@/assets/img/image.png"),
-					rating: "4.5★",
-					addToCartText: "Add to Cart",
-				},
-				{
-					id: 6,
-					name: "zNote W8",
-					price: "$2,700",
-					image: require("@/assets/img/image.png"),
-					rating: "4.5★",
-					addToCartText: "Add to Cart",
-				},
-				{
-					id: 6,
-					name: "zNote W8",
-					price: "$2,700",
-					image: require("@/assets/img/image.png"),
-					rating: "4.5★",
-					addToCartText: "Add to Cart",
-				},
-				{
-					id: 6,
-					name: "zNote W8",
-					price: "$2,700",
-					image: require("@/assets/img/image.png"),
-					rating: "4.5★",
-					addToCartText: "Add to Cart",
-				},
-				{
-					id: 6,
-					name: "zNote W8",
-					price: "$2,700",
-					image: require("@/assets/img/image.png"),
-					rating: "4.5★",
-					addToCartText: "Add to Cart",
-				},
-				{
-					id: 6,
-					name: "zNote W8",
-					price: "$2,700",
-					image: require("@/assets/img/image.png"),
-					rating: "4.5★",
-					addToCartText: "Add to Cart",
-				},
-				{
-					id: 6,
-					name: "zNote W8",
-					price: "$2,700",
-					image: require("@/assets/img/image.png"),
-					rating: "4.5★",
-					addToCartText: "Add to Cart",
-				},
-			],
+			products: [],
 			filters: {
 				keyword: "",
 				priceSort: "all",
@@ -203,20 +100,53 @@ export default {
 				maxRating: null,
 				stock: "all",
 			},
+			debounceFilterChange: null,
 		};
 	},
-	mounted() {
-		console.log(process.env);
+	watch: {
+		"$route.params.id": "fetchProducts" // Watch for category changes
+	},
+	created() {
+		this.debounceFilterChange = debounce(this.fetchProducts, 500); // 500ms delay
+		this.fetchProducts();
 	},
 	methods: {
+		async fetchProducts() {
+			try {
+				// Set up request parameters
+				const params = {
+					keyword: this.filters.keyword || null,
+					priceOrder: this.filters.priceSort === "high" ? "desc" : this.filters.priceSort === "low" ? "asc" : null,
+					ratingOrder: this.filters.ratingSort === "high" ? "desc" : this.filters.ratingSort === "low" ? "asc" : null,
+					minPrice: this.filters.minPrice || null,
+					maxPrice: this.filters.maxPrice || null,
+					minRating: this.filters.minRating || null,
+					maxRating: this.filters.maxRating || null,
+					inStock: this.filters.stock === "all" ? null : this.filters.stock === "in",
+					categoryId: this.$route.params.id || null, // Category filter
+				};
+
+				// Fetch data from the backend
+				const response = await axios.get(`${Env.API_BASE_URL}/products`, { params });
+				this.products = response.data;
+			} catch (error) {
+				console.error("Failed to fetch products:", error);
+			}
+		},
+		onFilterChange() {
+			this.debounceFilterChange();
+		},
 		sortPrice(order) {
 			this.filters.priceSort = order;
+			this.fetchProducts();
 		},
 		sortRating(order) {
 			this.filters.ratingSort = order;
+			this.fetchProducts();
 		},
 		setStock(status) {
 			this.filters.stock = status;
+			this.fetchProducts();
 		},
 		clearFilters() {
 			this.filters = {
@@ -229,23 +159,15 @@ export default {
 				maxRating: null,
 				stock: "all",
 			};
-		},
-		validateNonNegative(field) {
-			if (this.filters[field] < 0) {
-				this.filters[field] = 0;
-			}
+			this.fetchProducts();
 		},
 	},
 };
 </script>
 
+
 <style scoped lang="scss">
 .product-list {
-	text-align: center;
-	padding: 20px;
-}
-
-.products {
 	display: flex;
 	flex-wrap: wrap;
 	/* Allows items to wrap to the next line */
@@ -253,118 +175,108 @@ export default {
 	/* Centers items horizontally */
 	gap: 20px;
 	/* Space between cards */
+
+	.product-item {
+		text-align: center;
+		width: 200px;
+		margin: 10px;
+
+		/* Optional: Space around each card */
+		&:hover {
+			transform: scale(1.05);
+		}
+
+		.image {
+			width: 100%;
+			height: auto;
+			border-radius: 8px;
+		}
+
+		.price {
+			font-size: 14px;
+			font-weight: bold;
+			color: var(--light-text-color);
+			margin-top: 20px;
+			margin-bottom: 0px;
+		}
+
+		.name {
+			font-size: 16px;
+			font-weight: bold;
+			margin-top: 5px;
+			margin-bottom: 10px;
+		}
+
+		.rating {
+			font-size: 14px;
+			color: var(--light-text-color);
+			margin-top: 5px;
+		}
+
+	}
 }
 
-.product-card {
-	text-align: center;
-	width: 200px;
-	margin: 10px;
-	/* Optional: Space around each card */
-}
 
-.product-card:hover {
-	transform: scale(1.05);
-}
-
-.product-image {
-	width: 100%;
-	height: auto;
-	border-radius: 8px;
-}
-
-.product-name {
-	font-size: 16px;
-	font-weight: bold;
-	margin-top: 5px;
-	margin-bottom: 10px;
-}
-
-.product-price {
-	font-size: 18px;
-	color: #555;
-	margin-top: 20px;
-	margin-bottom: 0px;
-}
-
-.add-to-cart {
-	color: #d9534f;
-	text-decoration: none;
-	font-weight: bold;
-	display: inline-block;
-	margin-top: 10px;
-}
-
-.product-rating {
-	font-size: 14px;
-	color: #888;
-	margin-top: 5px;
-}
 
 .sidebar {
 	position: sticky; // Make sure this is set to sticky
 	top: 0px; // Adjust if needed
-}
 
-.product-filters {
-	padding: 20px;
-	width: 250px;
-	position: sticky;
-	top: 0px;
-}
+	.product-filters {
+		padding: 20px;
+		width: 250px;
+		position: sticky;
+		top: 0px;
+		gap: 30px;
+		display: flex;
+		flex-direction: column;
 
-.search-input {
-	width: 100%;
-	padding: 8px;
-	margin-bottom: 15px;
-	border: 1px solid #ccc;
-	border-radius: 4px;
-}
 
-.filter-group {
-	margin-bottom: 20px;
-}
+		.filter-group {
+			.action-links {
+				gap: 1em;
+				justify-content: start;
+				font-weight: bold;
+				font-size: 13px;
 
-.filter-group label {
-	font-weight: bold;
-	margin-bottom: 5px;
-	display: block;
-}
+				label {
+					font-weight: 600;
+				}
 
-.filter-group button {
-	background: none;
-	border: none;
-	color: #d9534f;
-	cursor: pointer;
-	margin-right: 5px;
-	padding: 5px;
-}
+				button {
+					font-weight: inherit;
+					font-size: inherit;
+					background: none;
+					border: none;
+					padding: 0px;
+				}
+			}
 
-.filter-group button.active {
-	font-weight: bold;
-	text-decoration: underline;
-}
 
-.range-inputs {
-	display: flex;
-	gap: 10px;
-	margin-top: 8px;
-}
+			.range-inputs {
+				display: flex;				
+				margin-top: 15px;
 
-.range-inputs input {
-	width: 50%;
-	padding: 5px;
-	border: 1px solid #ccc;
-	border-radius: 4px;
-}
+				input:first-child {
+					border-right: 0;
+					border-top-right-radius: 0;
+					border-bottom-right-radius: 0;
+				}
+				input:last-child {
+					border-top-left-radius: 0;
+					border-bottom-left-radius: 0;
+				}
+			}
 
-.clear-button {
-	width: 100%;
-	padding: 10px;
-	border: 1px solid #d9534f;
-	color: #d9534f;
-	border-radius: 4px;
-	background: none;
-	cursor: pointer;
-	font-weight: bold;
+
+
+		}
+
+	}
+
+
+	.clear-filter-button {
+		width: 100%;
+	}
 }
 </style>

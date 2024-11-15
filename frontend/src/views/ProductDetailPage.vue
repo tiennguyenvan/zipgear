@@ -2,7 +2,7 @@
 	<div class="wide">
 		<NavBar />
 		<div class="product-detail-container">
-			<div class="product-image">
+			<div class="image">
 				<img :src="selectedImage" alt="Product Image" class="main-image" />
 				<div class="thumbnail-container">
 					<img v-for="(image, index) in productDetails.images" :key="index" :src="image"
@@ -16,8 +16,8 @@
 				<p class="description">
 					The new MacBook Air is powered by the Apple M2 chip, which provides enhanced performance, battery life, and more.
 				</p> -->
-				<h2 class="product-name">{{ productDetails.name }}</h2>
-				<p class="product-price">{{ productDetails.price }}</p>
+				<h2 class="name">{{ productDetails.name }}</h2>
+				<p class="price">{{ productDetails.price }}</p>
 				<p class="description">{{ productDetails.description }}</p>
 				<button class="add-to-cart-btn">Add to Cart</button>
 
@@ -226,7 +226,7 @@ export default {
 	gap: 2em;
 	align-items: stretch; /* Make both sections stretch to the same height */
 
-	.product-image {
+	.image {
 		flex: 2;
 		padding: 2em;
 		display: flex;
@@ -282,7 +282,7 @@ export default {
 			margin-bottom: var(--spacing-element-small);
 		}
 
-		.product-price {
+		.price {
 			font-size: 1.5em;
 			color: var(--success-color);
 			font-weight: var(--font-weight-button);

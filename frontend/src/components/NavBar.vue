@@ -110,17 +110,5 @@ export default {
 		border-bottom: 2px solid var(--primary-color);
 	}
 }
-.links {
-	justify-content: start;
-	gap: var(--spacing-element-large);
-	li {
-		display: flex;
-		align-items: center;
-		a {
-			display: block;
-			padding: 0.5rem 1rem;
-		}
-	}
-}
 
 </style>
