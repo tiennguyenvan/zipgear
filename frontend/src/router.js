@@ -10,7 +10,7 @@ const routes = [
 	{ path: '/login', name: 'login', component: LoginPage },
 	{ path: '/profile', name: 'profile', component: ProfilePage },
 	{ path: '/checkout', name: 'checkout', component: CheckoutPage },
-	{ path: '/product/:id', name: 'checkout', component: ProductDetailPage },
+	{ path: '/product/:id', name: 'product-detail', component: ProductDetailPage },
 ];
 
 const router = createRouter({
