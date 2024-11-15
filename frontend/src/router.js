@@ -7,10 +7,12 @@ import ProductDetailPage from './views/ProductDetailPage.vue';
 
 const routes = [
 	{ path: '/', name: 'home', component: ProductListPage },
+	{ path: '/category/:id', name: 'CategoryPage', component: ProductListPage,	},
 	{ path: '/login', name: 'login', component: LoginPage },
 	{ path: '/profile', name: 'profile', component: ProfilePage },
 	{ path: '/checkout', name: 'checkout', component: CheckoutPage },
 	{ path: '/product/:id', name: 'product-detail', component: ProductDetailPage },
+	
 ];
 
 const router = createRouter({

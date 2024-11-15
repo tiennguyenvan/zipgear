@@ -5,9 +5,9 @@
 			<li>
 				<SiteLogo />
 			</li>
-			<li><router-link to="/cat/laptop">Laptop</router-link></li>
-			<li><router-link to="/cat/laptop">Mobile</router-link></li>
-			<li><router-link to="/cat/headphone">Headphone</router-link></li>
+			<li v-for="category in categories" :key="category.categoryId">
+				<router-link :to="`/category/${category.categoryId}`">{{ category.name }}</router-link>
+			</li>
 		</ul>
 
 		<!-- User and Cart Links -->
@@ -25,6 +25,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 import Env from '@/utils/Env';
 import SiteLogo from './SiteLogo.vue';
 
@@ -35,12 +36,12 @@ export default {
 	},
 	data() {
 		return {
+			categories: [], // To store categories from backend
 			adminEmail: Env.ADMIN_EMAIL, // Read ADMIN_EMAIL from env file
 			userEmail: localStorage.getItem('email'), // Get email from local storage
 		};
 	},
 	computed: {
-
 		userText() {
 			if (this.userEmail === this.adminEmail) {
 				return 'Orders';
@@ -57,6 +58,19 @@ export default {
 				return '/profile';
 			} else {
 				return '/login';
+			}
+		},
+	},
+	mounted() {
+		this.fetchCategories();
+	},
+	methods: {
+		async fetchCategories() {
+			try {
+				const response = await axios.get(`${Env.API_BASE_URL}/categories`);
+				this.categories = response.data;
+			} catch (error) {
+				console.error('Failed to fetch categories:', error);
 			}
 		},
 	},
@@ -96,4 +110,17 @@ export default {
 		border-bottom: 2px solid var(--primary-color);
 	}
 }
+.links {
+	justify-content: start;
+	gap: var(--spacing-element-large);
+	li {
+		display: flex;
+		align-items: center;
+		a {
+			display: block;
+			padding: 0.5rem 1rem;
+		}
+	}
+}
+
 </style>
