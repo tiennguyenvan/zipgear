@@ -16,7 +16,7 @@
                 <router-link :to="userLink">{{ userText }}</router-link>
             </li>
             <li>
-                <router-link to="/checkout" class="cart">
+                <router-link to="/cart" class="cart">
                     Cart <strong class="count">({{ cartCount }})</strong>
                 </router-link>
             </li>
