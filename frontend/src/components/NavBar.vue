@@ -41,7 +41,7 @@ export default {
     },
     computed: {
         userText() {
-            if (User.getUser().email === Env.ADMIN_EMAIL) {
+            if (User.getUserEmailCode().email === Env.ADMIN_EMAIL) {
                 return 'Orders';
             } else if (User.isLoggedIn()) {
                 return 'Profile';
@@ -50,7 +50,7 @@ export default {
             }
         },
         userLink() {
-            if (User.getUser().email === Env.ADMIN_EMAIL) {
+            if (User.getUserEmailCode().email === Env.ADMIN_EMAIL) {
                 return '/orders';
             } else if (User.isLoggedIn()) {
                 return '/profile';
@@ -59,11 +59,15 @@ export default {
             }
         },
         cartCount() {
-            return User.cartCount; // Dynamically fetch cart count
+            return User.cartCount.value; // Dynamically fetch cart count
         },
     },
+
     mounted() {
         this.fetchCategories();
+    },
+	async created() {
+		await User.init();
     },
     methods: {
         async fetchCategories() {

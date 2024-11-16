@@ -1,105 +1,127 @@
-import { reactive } from "vue";
 import axios from "axios";
 import Env from "./Env";
+import { ref } from "vue";
 
 const User = {
-    state: reactive({
-        userCartProductIds: [], // Stores IDs of products in the cart
-        isInitialized: false,  // Tracks if initialization has been done
-    }),
+	// Plain properties
+	userCartProductIds: [], // IDs of products in the cart
+	userCartItems: [], // Complete cart items
+	isInitialized: false, // Tracks if initialization has been done
+	cartCount: ref(0),
 
-    isLoggedIn() {
-        return !!localStorage.getItem(Env.K_EMAIL) && !!localStorage.getItem(Env.K_CODE);
-    },
+	// Check if user is logged in
+	isLoggedIn() {
+		return !!localStorage.getItem(Env.K_EMAIL) && !!localStorage.getItem(Env.K_CODE);
+	},
 
-    login(email, code) {
-        localStorage.setItem(Env.K_EMAIL, email);
-        localStorage.setItem(Env.K_CODE, code);
-    },
+	// Login/Logout methods
+	login(email, code) {
+		localStorage.setItem(Env.K_EMAIL, email);
+		localStorage.setItem(Env.K_CODE, code);
+	},
 
-    logout(router) {
-        localStorage.removeItem(Env.K_EMAIL);
-        localStorage.removeItem(Env.K_CODE);
-        this.state.userCartProductIds = [];
-        this.state.isInitialized = false;
-        router.push("/");
-    },
+	logout() {
+		localStorage.removeItem(Env.K_EMAIL);
+		localStorage.removeItem(Env.K_CODE);
+		this.userCartProductIds = [];
+		this.userCartItems = [];
+		this.isInitialized = false;
+		this.cartCount.value = 0;
+	},
+	logoutAtLoginPage(router, productId) {		
+		this.logout();
+		if (productId) {
+			router.push("/login/add-to-cart/" + productId);
+		} else {
+			router.push("/login");
+		}
+	},
 
-    getUser() {
-        return {
-            email: localStorage.getItem(Env.K_EMAIL),
-            code: localStorage.getItem(Env.K_CODE),
-        };
-    },
+	// Get user credentials
+	getUserEmailCode() {
+		return {
+			email: localStorage.getItem(Env.K_EMAIL),
+			code: localStorage.getItem(Env.K_CODE),
+		};
+	},
 
-    async ensureInitialized(router) {
-        if (!this.state.isInitialized) {
-            if (!this.isLoggedIn()) {
-                router.push("/login");
-                return;
-            }
-            await this.fetchCartData();
-            this.state.isInitialized = true;
-        }
-    },
+	// Ensure cart data is initialized
+	async init() {
+		if (!this.isInitialized) {
+			await this.fetchCartData();
+			this.isInitialized = true;
+		}
+	},
 
-    async fetchCartData() {
-        const { email, code } = this.getUser();
+	// Fetch cart data from the backend
+	async fetchCartData() {
+		const { email, code } = this.getUserEmailCode();
 
-        if (!email || !code) {
-            console.error("Missing email or code for cart request:", { email, code });
-            return [];
-        }
+		if (!email || !code) {
+			// console.error("Missing email or code for cart request:", { email, code });
+			return;
+		}
 
-        try {
-            const response = await axios.get(`${Env.API_BASE_URL}/carts`, {
-                params: { email, code },
-            });
-            this.state.userCartProductIds = response.data.items.map(
-                (item) => item.product.productId
-            );
-        } catch (error) {
-            console.error("Failed to fetch cart data:", error);
-        }
-    },
+		try {
+			const response = await axios.get(`${Env.API_BASE_URL}/carts`, {
+				params: { email, code },
+			});
 
-    async addToCart(productId, router) {
-        await this.ensureInitialized(router);
+			// Update cart data
+			this.userCartItems = response.data.items;
+			this.userCartProductIds = response.data.items.map((item) => item.product.productId);
+			this.cartCount.value = this.userCartProductIds.length;
 
-        try {
-            const { email, code } = this.getUser();
-            await axios.put(`${Env.API_BASE_URL}/carts/${productId}`, {
-                email,
-                code,
-                changeNumber: 1,
-            });
+		} catch (error) {
+			console.error("Failed to fetch cart data:", error);
+		}
+	},
 
-            await this.fetchCartData(); // Refresh cart data after adding a product
-        } catch (error) {
-            console.error("Failed to add product to cart:", error);
-        }
-    },
+	// Add a product to the cart
+	async removeFromCart(productId, router) {
+		await this.addToCart(productId, router, -1);
+	},
+	async addToCart(productId, router, change = 1) {
+		if (!this.isLoggedIn()) {
+			this.logoutAtLoginPage(router, productId);
+			return;
+		}
+		await this.init();
 
-    async isProductInCart(productId, router) {
-        await this.ensureInitialized(router);
-        return this.state.userCartProductIds.includes(productId);
-    },
+		const { email, code } = this.getUserEmailCode();
+		try {
+			await axios.put(`${Env.API_BASE_URL}/carts/${productId}`, {
+				email,
+				code,
+				changeNumber: change, // Add one item by default
+			});
 
-    async getAddToCartText(productId, router) {
-        await this.ensureInitialized(router);
+			await this.fetchCartData(); // Refresh cart data
+		} catch (error) {
+			console.error("Failed to add product to cart:", error);
+		}
+	},
 
-        if (!this.isLoggedIn()) {
-            return "Login to Add";
-        } else if (await this.isProductInCart(productId, router)) {
-            return "✓ Add More to Cart";
-        } else {
-            return "Add to Cart";
-        }
-    },
+	// Utility to check if a product is in the cart
+	isProductInCart(productId) {
+		return this.userCartProductIds.includes(productId);
+	},
 
-    get cartCount() {
-        return this.state.userCartProductIds.length;
-    },
+	// Utility to get button text for "Add to Cart"
+	getAddToCartText(productId) {
+		if (!this.isLoggedIn()) {
+			return "Login to Add";
+		} else if (this.isProductInCart(productId)) {
+			return "✓ Add More to Cart";
+		} else {
+			return "Add to Cart";
+		}
+	},
+
+	// Cart count
+	getCartCount() {
+		return this.userCartProductIds.length;
+	},
 };
 
 export default User;

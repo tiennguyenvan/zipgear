@@ -10,20 +10,20 @@
 						<img :src="item.product.imageSrcs[0]" alt="Product Image" class="product-image" />
 						<div class="product-info">
 							<h3>{{ item.product.title }}</h3>
-							<p>${{ item.product.price }}</p>
+							<p>{{ formatCurrency(item.product.price) }}</p>
 						</div>
 						<div class="quantity-controls flex">
 							<button class="quantity-btn" @click="updateCart(item.product.productId, -1)">
-								-
+								−
 							</button>
-							<input type="number" class="quantity-input" v-model.number="item.quantity"
-								@change="updateCart(item.product.productId, 0, item.quantity)" min="1" />
+							<input class="quantity-input" v-model.number="item.quantity"
+								@change="updateCart(item.product.productId, -item.quantity /*0 , item.quantity*/)" min="0" disabled/>
 							<button class="quantity-btn" @click="updateCart(item.product.productId, 1)">
 								+
 							</button>
 						</div>
 						<div class="product-total">
-							<span>Total</span> <strong>${{ (item.product.price * item.quantity).toFixed(2) }}</strong>
+							<span>Total</span> <strong>{{ formatCurrency((item.product.price * item.quantity).toFixed(2)) }}</strong>
 						</div>
 					</div>
 				</div>
@@ -33,7 +33,7 @@
 			<!-- Checkout Form -->
 			<div class="checkout sidebar">
 				<h3>Total: </h3>
-				<h2 class="final-price">${{ cartTotal.toFixed(2) }}</h2>
+				<h2 class="final-price">{{ formatCurrency(cartTotal.toFixed(2)) }}</h2>
 				<p>Cash on Delivery</p>
 
 				<label for="address">Delivery Address</label>
@@ -53,6 +53,7 @@ import NavBar from "@/components/NavBar.vue";
 import User from "@/utils/User";
 import axios from "axios";
 import Env from "@/utils/Env";
+import Lib from "@/utils/Lib";
 
 export default {
 	name: "CartPage",
@@ -78,22 +79,22 @@ export default {
 		await this.loadUserAddress(); // Load the user's saved address
 	},
 	methods: {
+		formatCurrency(value) {
+            return Lib.formatCurrency(value);
+        },
 		// Fetch cart data from the backend
 		async fetchCartItems() {
 			try {
-				const { email, code } = User.getUser();
-				const response = await axios.get(`${Env.API_BASE_URL}/carts`, {
-					params: { email, code },
-				});
-				this.cartItems = response.data.items;
-			} catch (error) {
-				console.error("Failed to fetch cart items:", error);
-			}
+                await User.fetchCartData(); // Fetch cart data via User
+                this.cartItems = User.userCartItems; // Sync with User's cart items
+            } catch (error) {
+                console.error("Failed to fetch cart items:", error);
+            }
 		},
 		// Fetch user address from the backend
 		async loadUserAddress() {
 			try {
-				const { email } = User.getUser();
+				const { email } = User.getUserEmailCode();
 				const response = await axios.get(`${Env.API_BASE_URL}/users/${email}/address`);
 				this.userAddress = response.data.address || "";
 			} catch (error) {
@@ -101,40 +102,31 @@ export default {
 			}
 		},
 		// Update cart item quantity
-		async updateCart(productId, change, quantity = null) {
+		async updateCart(productId, change /*, quantity = null*/) {
+			// console.log(change);
 			try {
-				const { email, code } = User.getUser();
-				const requestData = {
-					email,
-					code,
-					changeNumber: change,
-					quantity: quantity !== null ? quantity : undefined,
-				};
-				const response = await axios.put(
-					`${Env.API_BASE_URL}/carts/${productId}`,
-					requestData
-				);
-				this.cartItems = response.data.items; // Update cart items
-			} catch (error) {
-				console.error("Failed to update cart:", error);
-			}
+                // Use User.js to update the cart
+                if (change < 0) {
+                    await User.removeFromCart(productId, this.$router);
+                } else {
+                    await User.addToCart(productId, this.$router, change);
+                }
+                // Refresh local cart data after update
+                this.cartItems = User.userCartItems;
+            } catch (error) {
+                console.error("Failed to update cart:", error);
+            }
 		},
 		// Checkout the cart and create an order
 		async checkout() {
 			try {
-				const { email, code } = User.getUser();
+				const { email, code } = User.getUserEmailCode();
 				await axios.post(`${Env.API_BASE_URL}/orders`, {
 					email,
 					code,
 					deliveryAddress: this.userAddress,
 				});
-				// const response = await axios.post(`${Env.API_BASE_URL}/orders`, {
-				//     email,
-				//     code,
-				//     deliveryAddress: this.userAddress,
-				// });
-
-				// alert("Order placed successfully!");
+		
 				this.cartItems = []; // Clear the cart
 				this.userAddress = ""; // Clear the address
 			} catch (error) {
@@ -181,28 +173,37 @@ export default {
 			display: flex;
 			align-items: center;
 			margin-right: 50px;
-			gap: 10px;
+			gap: 15px;
 
 			.quantity-btn {
 				background: none;
 				border: none;
-				font-size: 32px;
+				font-size: 20px;
 				cursor: pointer;
 				font-weight: 100;
 				padding: 0;
+				user-select: none;
 			}
 
 			.quantity-input {
-				width: 2em;
+				// width: 3em;				
 				text-align: center;
-				border: 1px solid var(--border-color);
+				// border: 1px solid var(--border-color);
 				border-radius: 5px;
 				box-sizing: content-box;
-				padding: 10px 0px 10px 10px;
+				// padding: 10px 0px 10px 10px;
+				font-size: 1.2em;
+				font-weight: 600;
+				width: 2em;				
+				padding: 0;
+				background: none;
+				border: none;
 			}
 		}
 
 		.product-total {
+			width: 100px;
+			align-items: end;
 			font-size: var(--font-size-content);
 			font-weight: 400;
 			display: flex;

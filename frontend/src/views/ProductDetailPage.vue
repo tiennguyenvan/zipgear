@@ -1,70 +1,88 @@
 <template>
-	<div class="wide">
-		<NavBar />
-		<div class="card flex wrapper product-details">
-			<div class="main flex feature-image-wrapper">
-				<img :src="selectedFeatureImage" alt="Product Feature Image" class="feature-image" />
-				<div class="flex thumbnail-wrapper">
-					<img v-for="(image, index) in productDetails.imageSrcs" :key="index" :src="image"
-						:class="{ 'active-thumbnail': selectedFeatureImage === image }" @click="selectImage(image)"
-						class="thumbnail" alt="Thumbnail" />
-				</div>
-			</div>
-			<div class="sidebar flex product-info">
-				<h2 class="name">{{ productDetails.title }}</h2>
-				<p class="price">${{ productDetails.price }}</p>
-				<p class="description">{{ productDetails.description }}</p>
+    <div class="wide">
+        <NavBar />
+        <div class="card flex wrapper product-details">
+            <div class="main flex feature-image-wrapper">
+                <img :src="selectedFeatureImage" alt="Product Feature Image" class="feature-image" />
+                <div class="flex thumbnail-wrapper">
+                    <img
+                        v-for="(image, index) in productDetails.imageSrcs"
+                        :key="index"
+                        :src="image"
+                        :class="{ 'active-thumbnail': selectedFeatureImage === image }"
+                        @click="selectImage(image)"
+                        class="thumbnail"
+                        alt="Thumbnail"
+                    />
+                </div>
+            </div>
+            <div class="sidebar flex product-info">
+                <h2 class="name">{{ productDetails.title }}</h2>
+                <p class="price">{{ formatCurrency(productDetails.price) }}</p>
+                <p class="description">{{ productDetails.description }}</p>
 
-				<!-- In Product Detail Template -->
-				
-				<button class="primary-btn add-to-cart" @click="addToCart">
-					{{addToCartText}}
-				</button>				
+                <!-- Add to Cart Button -->
+                <button class="primary-btn add-to-cart" @click="addToCart">
+                    {{ addToCartButtonText}}
+                </button>
 
+                <!-- Ratings and Reviews Section -->
+                <div class="rating">
+                    <p class="rating-score">
+                        {{ productDetails.averageRating }}★ /
+                        <span class="rating-length">{{ productDetails.reviews?.length || 0 }} ratings</span>
+                    </p>
+                    <div class="reviews">
+                        <div v-for="(review, index) in productDetails.reviews" :key="index" class="user-review">
+                            <div class="review-header">
+                                <div class="review-rating">
+                                    <span
+                                        v-for="star in 5"
+                                        :key="star"
+                                        :class="{ 'filled': star <= review.rating, 'unfilled': star > review.rating }"
+                                        >★</span
+                                    >
+                                </div>
+                                <strong class="review-user">{{ review.name }}</strong>
+                            </div>
+                            <p class="review-comment">{{ review.comment }}</p>
+                        </div>
+                    </div>
 
-				<!-- Ratings and Reviews Section -->
-				<div class="rating">
-					<p class="rating-score">
-						{{ productDetails.averageRating }}★ / <span class="rating-length">{{
-							productDetails.reviews?.length || 0 }} ratings</span>
-					</p>
-					<div class="reviews">
-						<div v-for="(review, index) in productDetails.reviews" :key="index" class="user-review">
-							<div class="review-header">
-								<div class="review-rating">
-									<span v-for="star in 5" :key="star"
-										:class="{ 'filled': star <= review.rating, 'unfilled': star > review.rating }">★</span>
-								</div>
-								<strong class="review-user">{{ review.name }}</strong>
-							</div>
-							<p class="review-comment">{{ review.comment }}</p>
-						</div>
-					</div>
-
-					<!-- Add New Review Section -->
-					<div class="add-review">
-						<button class="add-rating-btn" @click="submitReview">Add Your Rating</button>
-						<div class="star-rating">
-							<span v-for="star in 5" :key="star" @click="newReview.rating = star"
-								:class="{ 'selected': star <= newReview.rating }">★</span>
-							<h4 class="review-user-name">Tim Nguyen</h4>
-						</div>
-						<textarea v-model="newReview.comment" placeholder="Your review here..." required></textarea>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+                    <!-- Add New Review Section -->
+                    <div class="add-review">
+                        <button class="add-rating-btn" @click="submitReview">Add Your Rating</button>
+                        <div class="star-rating">
+                            <span
+                                v-for="star in 5"
+                                :key="star"
+                                @click="newReview.rating = star"
+                                :class="{ 'selected': star <= newReview.rating }"
+                                >★</span
+                            >
+                            <h4 class="review-user-name">Tim Nguyen</h4>
+                        </div>
+                        <textarea
+                            v-model="newReview.comment"
+                            placeholder="Your review here..."
+                            required
+                        ></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script>
-import axios from 'axios';
-import NavBar from '@/components/NavBar.vue';
-import Env from '@/utils/Env';
-import User from '@/utils/User';
+import axios from "axios";
+import NavBar from "@/components/NavBar.vue";
+import Env from "@/utils/Env";
+import User from "@/utils/User";
+import Lib from "@/utils/Lib";
 
 export default {
-    name: 'ProductDetailPage',
+    name: "ProductDetailPage",
     components: {
         NavBar,
     },
@@ -72,32 +90,25 @@ export default {
         return {
             productId: null,
             productDetails: {},
-            selectedFeatureImage: '',
+            selectedFeatureImage: "",
+			addToCartButtonText: "Add to Cart",
             newReview: {
-                comment: '',
+                comment: "",
                 rating: 0,
-                user: 'Tim Nguyen',
+                user: "Tim Nguyen",
             },
         };
-    },
-    computed: {
-        // Dynamically compute the button text based on the cart state
-        addToCartText() {
-            if (!User.isLoggedIn()) {
-                return "Login to Add";
-            } else if (User.state.userCartProductIds.includes(this.productId)) {
-                return "✓ Add More to Cart";
-            } else {
-                return "Add to Cart";
-            }
-        },
-    },
+    },    
     async created() {
         this.productId = parseInt(this.$route.params.id, 10); // Ensure the productId is a number
-        await User.ensureInitialized(this.$router); // Ensure cart is initialized
-        this.fetchProductDetails(this.productId); // Fetch product details
+        await User.init(); 
+        await this.fetchProductDetails(this.productId); // Fetch product details
+		this.updateAddToCartText();
     },
     methods: {
+        formatCurrency(value) {
+            return Lib.formatCurrency(value);
+        },
         async fetchProductDetails(id) {
             try {
                 const response = await axios.get(`${Env.API_BASE_URL}/products/${id}`);
@@ -117,7 +128,7 @@ export default {
                     rating: this.newReview.rating,
                     comment: this.newReview.comment.trim(),
                 });
-                this.newReview.comment = '';
+                this.newReview.comment = "";
                 this.newReview.rating = 0;
             }
         },
@@ -127,10 +138,16 @@ export default {
             } catch (error) {
                 console.error("Error adding product to cart:", error);
             }
+            this.updateAddToCartText(); // Update button text after adding to cart
         },
+		updateAddToCartText() {
+			// Dynamically update the button text based on cart state
+            this.addToCartButtonText = User.getAddToCartText(this.productId);
+		},
     },
 };
 </script>
+
 
 <style scoped lang="scss">
 .product-details {

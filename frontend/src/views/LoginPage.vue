@@ -90,7 +90,7 @@ export default {
 			}
 		},
 
-		async login() {
+		async login() {			
 			this.errorMessage = '';
 			try {
 				const response = await fetch(Env.API_BASE_URL + '/users/verify-code', {
@@ -108,7 +108,7 @@ export default {
 						await User.addToCart(productId, this.$router);
 
 						// Determine redirection based on the previous route
-						const previousPage = this.$router.history.state.back;
+						const previousPage = this.$router?.history?.state?.back;
 						if (!previousPage || previousPage === '/login') {
 							// Redirect to main page if no previous page or came from login
 							this.$router.push('/');
@@ -118,7 +118,7 @@ export default {
 						}
 					} else {
 						// Redirect to profile if no productId provided
-						console.log("Go to profile", User.getUser());
+						console.log("Go to profile", User.getUserEmailCode());
 						this.$router.push('/profile');
 					}
 					return;
