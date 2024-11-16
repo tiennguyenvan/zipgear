@@ -85,6 +85,7 @@ export default {
 <style scoped lang="scss">
 .navbar {
 	align-items: stretch;
+	padding: 0 0.5em;
 
 	ul {
 		justify-content: start;
