@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -33,26 +34,39 @@ public class OrderController {
 
 	// GET: Get all orders by a user
 	@GetMapping("/orders")
-	public ResponseEntity<?> getAllOrders(@RequestBody Map<String, Object> request) {
-		User user = Lib.getRequestingUser(request, userRepository);
+	public ResponseEntity<?> getAllOrders(@RequestParam(required = true) String email,
+			@RequestParam(required = true) String code) {
+		User user = Lib.getRequestingUser(email, code, userRepository);
 		if (user == null) {
 			return Lib.userRestResponseErr;
 		}
-
+		
 		return ResponseEntity.ok(orderRepository.findByUser(user));
-
-		// @fixme: Only allow admin access all orders
-		// List<Order> orders = orderRepository.findAll();
-		// return ResponseEntity.ok(orders);
 	}
 
 	@GetMapping("/orders/{orderId}")
-	public ResponseEntity<?> getOrderById(@PathVariable Long orderId) {
-		Optional<Order> orderOpt = orderRepository.findById(orderId);
-		if (orderOpt.isPresent()) {
-			return ResponseEntity.ok(orderOpt.get());
+	public ResponseEntity<?> getOrderById(@PathVariable Long orderId, @RequestParam(required = true) String email,
+	@RequestParam(required = true) String code) {
+		// Validate the user
+		User user = Lib.getRequestingUser(email, code, userRepository);
+		if (user == null) {
+			return Lib.userRestResponseErr;
 		}
-		return Lib.RestNotFound("Order not found");
+	
+		// Retrieve the order by ID
+		Optional<Order> orderOpt = orderRepository.findById(orderId);
+		if (orderOpt.isEmpty()) {
+			return Lib.RestNotFound("Order not found");
+		}
+	
+		Order order = orderOpt.get();
+	
+		// Ensure the user can only access their own orders, unless they are admin
+		if (!order.getUser().equals(user) /*&& !user.isAdmin()*/) { // Assuming isAdmin() checks for admin status
+			return Lib.RestUnauthorized("You are not authorized to view this order");
+		}
+	
+		return ResponseEntity.ok(order);
 	}
 
 	@PostMapping("/orders")

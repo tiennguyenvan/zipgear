@@ -14,7 +14,13 @@
 				<h2 class="name">{{ productDetails.title }}</h2>
 				<p class="price">${{ productDetails.price }}</p>
 				<p class="description">{{ productDetails.description }}</p>
-				<button class="primary-btn add-to-cart">Add to Cart</button>
+
+				<!-- In Product Detail Template -->
+				
+				<button class="primary-btn add-to-cart" @click="addToCart">
+					{{addToCartText}}
+				</button>				
+
 
 				<!-- Ratings and Reviews Section -->
 				<div class="rating">
@@ -55,53 +61,74 @@
 import axios from 'axios';
 import NavBar from '@/components/NavBar.vue';
 import Env from '@/utils/Env';
+import User from '@/utils/User';
 
 export default {
-	name: 'ProductDetailPage',
-	components: {
-		NavBar,
-	},
-	data() {
-		return {
-			productId: null,
-			productDetails: {},
-			selectedFeatureImage: '',
-			newReview: {
-				comment: '',
-				rating: 0,
-				user: 'Tim Nguyen'
-			}
-		};
-	},
-	created() {
-		this.productId = this.$route.params.id; // Get the product ID from the route parameter
-		this.fetchProductDetails(this.productId); // Fetch product details
-	},
-	methods: {
-		async fetchProductDetails(id) {
-			try {
-				const response = await axios.get(`${Env.API_BASE_URL}/products/${id}`);
-				this.productDetails = response.data;
-				this.selectedFeatureImage = this.productDetails.imageSrcs[0]; // Set initial image
-			} catch (error) {
-				console.error("Error fetching product details:", error);
-			}
-		},
-		selectImage(image) {
-			this.selectedFeatureImage = image; // Update the main image on thumbnail click
-		},
-		submitReview() {
-			if (this.newReview.comment.trim() && this.newReview.rating > 0) {
-				this.productDetails.reviews.push({
-					name: this.newReview.user,
-					rating: this.newReview.rating,
-					comment: this.newReview.comment.trim()
-				});
-				this.newReview.comment = '';
-				this.newReview.rating = 0;
-			}
-		}
-	}
+    name: 'ProductDetailPage',
+    components: {
+        NavBar,
+    },
+    data() {
+        return {
+            productId: null,
+            productDetails: {},
+            selectedFeatureImage: '',
+            newReview: {
+                comment: '',
+                rating: 0,
+                user: 'Tim Nguyen',
+            },
+        };
+    },
+    computed: {
+        // Dynamically compute the button text based on the cart state
+        addToCartText() {
+            if (!User.isLoggedIn()) {
+                return "Login to Add";
+            } else if (User.state.userCartProductIds.includes(this.productId)) {
+                return "✓ Add More to Cart";
+            } else {
+                return "Add to Cart";
+            }
+        },
+    },
+    async created() {
+        this.productId = parseInt(this.$route.params.id, 10); // Ensure the productId is a number
+        await User.ensureInitialized(this.$router); // Ensure cart is initialized
+        this.fetchProductDetails(this.productId); // Fetch product details
+    },
+    methods: {
+        async fetchProductDetails(id) {
+            try {
+                const response = await axios.get(`${Env.API_BASE_URL}/products/${id}`);
+                this.productDetails = response.data;
+                this.selectedFeatureImage = this.productDetails.imageSrcs[0]; // Set initial image
+            } catch (error) {
+                console.error("Error fetching product details:", error);
+            }
+        },
+        selectImage(image) {
+            this.selectedFeatureImage = image; // Update the main image on thumbnail click
+        },
+        submitReview() {
+            if (this.newReview.comment.trim() && this.newReview.rating > 0) {
+                this.productDetails.reviews.push({
+                    name: this.newReview.user,
+                    rating: this.newReview.rating,
+                    comment: this.newReview.comment.trim(),
+                });
+                this.newReview.comment = '';
+                this.newReview.rating = 0;
+            }
+        },
+        async addToCart() {
+            try {
+                await User.addToCart(this.productId, this.$router); // Add product to the cart
+            } catch (error) {
+                console.error("Error adding product to cart:", error);
+            }
+        },
+    },
 };
 </script>
 

@@ -32,6 +32,8 @@
 
 <script>
 import SiteLogo from '@/components/SiteLogo.vue';
+import Env from '@/utils/Env';
+import User from '@/utils/User';
 
 
 
@@ -65,9 +67,9 @@ export default {
 		async getValidationCode() {
 			this.isLoading = true;
 			this.errorMessage = '';
-
+			console.log(Env.API_BASE_URL + '/users/request-code');
 			try {
-				const response = await fetch('http://localhost:8080/api/user/request-code', {
+				const response = await fetch(Env.API_BASE_URL + '/users/request-code', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({ email: this.email }),
@@ -91,7 +93,7 @@ export default {
 		async login() {
 			this.errorMessage = '';
 			try {
-				const response = await fetch('http://localhost:8080/api/user/verify-code', {
+				const response = await fetch(Env.API_BASE_URL + '/users/verify-code', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({ code: this.validationCode, email: this.email }),
@@ -99,9 +101,26 @@ export default {
 
 				if (response.ok) {
 					// alert('Login successful!');
-					localStorage.setItem('email', this.email);
-					localStorage.setItem('code', this.validationCode);
-					this.$router.push('/profile');
+					User.login(this.email, this.validationCode);
+					const productId = this.$route.params.productId; // Check if there's a product ID to add
+					if (productId) {
+						// Add product to cart
+						await User.addToCart(productId, this.$router);
+
+						// Determine redirection based on the previous route
+						const previousPage = this.$router.history.state.back;
+						if (!previousPage || previousPage === '/login') {
+							// Redirect to main page if no previous page or came from login
+							this.$router.push('/');
+						} else {
+							// Go back to the previous page
+							this.$router.push(previousPage);
+						}
+					} else {
+						// Redirect to profile if no productId provided
+						console.log("Go to profile", User.getUser());
+						this.$router.push('/profile');
+					}
 					return;
 				}
 
@@ -133,6 +152,7 @@ export default {
 	form {
 		padding: var(--padding-container-small);
 		box-sizing: content-box;
+
 		h3 {
 			margin-top: 0;
 		}

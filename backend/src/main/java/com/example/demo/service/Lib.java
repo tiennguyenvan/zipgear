@@ -50,7 +50,9 @@ public class Lib {
 	///////////////////////////////////////
 	/// User validation
 	// --- Utility Method to Validate Session and Return User ---
-	public static User getRequestingUser(Map<String, ?> request, UserRepository userRepository) {
+	public static User getRequestingUser(
+		Map<String, ?> request, UserRepository userRepository
+	) {
 		String email = (String) request.get("email");
 		String code = (String) request.get("code");
 

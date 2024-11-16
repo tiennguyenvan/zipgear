@@ -52,7 +52,7 @@ public class DemoApplication {
 
 
             User mockUser = new User();
-            mockUser.setEmail("nguyentien.jobs@gmail.com");
+            mockUser.setEmail("a@a");
             mockUser.setAddresses(Arrays.asList("123 Mock St, Mock City, Mock Country"));
 
             // Save the user to the repository

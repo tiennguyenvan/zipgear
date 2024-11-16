@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -27,8 +26,9 @@ public class CartController {
 
 	// Get cart by user ID
 	@GetMapping("/carts")
-	public ResponseEntity<?> getCart(@RequestBody Map<String, String> request) {
-		User user = Lib.getRequestingUser(request, userRepository);
+	public ResponseEntity<?> getCart(@RequestParam(required = true) String email,
+			@RequestParam(required = true) String code) {
+		User user = Lib.getRequestingUser(email, code, userRepository);
 		if (user == null) {
 			return Lib.userRestResponseErr;
 		}
@@ -40,7 +40,8 @@ public class CartController {
 
 		return ResponseEntity.ok(cart);
 	}
-	
+
+	// add a product to carts
 	@PutMapping("/carts/{productId}")
 	public ResponseEntity<?> updateCartByProductId(
 			@PathVariable Long productId,
@@ -59,7 +60,7 @@ public class CartController {
 		// Fetch or create a cart for the user
 		Cart cart = cartRepository.findByUser(user);
 		if (cart == null) {
-			cart = new Cart(user);			
+			cart = new Cart(user);
 		}
 
 		// Check if the product exists in the cart
@@ -79,9 +80,11 @@ public class CartController {
 			cartRepository.save(cart);
 			return ResponseEntity.ok(cart);
 		}
-		
-		// if the product is not available in the cart then change number is the quantity
+
+		// if the product is not available in the cart then change number is the
+		// quantity
 		if (changeNumber > 0) {
+
 			Optional<Product> productOpt = productRepository.findById(productId);
 			if (productOpt.isEmpty()) {
 				return Lib.RestBadRequest("Product with ID " + productId + " not found");
@@ -89,11 +92,12 @@ public class CartController {
 
 			Product product = productOpt.get();
 			// Add the new item to the cart
-			CartItem newCartItem = new CartItem(cart, product, changeNumber);
+			CartItem newCartItem = new CartItem(cart, product,
+					changeNumber);
 			cart.getItems().add(newCartItem);
 			cartRepository.save(cart);
 			return ResponseEntity.ok(cart);
-		} 
+		}
 		// reduce a non-exist product to 0 does not change anything of the cart
 		cartRepository.save(cart);
 		return ResponseEntity.ok(cart);
