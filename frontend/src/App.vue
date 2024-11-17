@@ -129,6 +129,7 @@ body {
 	color: var(--text-color);
 	margin: 0;
 	padding: 0;
+	word-wrap: break-word;
 }
 
 h1 {
@@ -304,7 +305,7 @@ button.active:active {
 	width: 0;
 	padding: var(--padding-container);	
 	height: 100%;
-	min-height: 50vh;
+	min-height: 70vh;
 }
 .sidebar {
 	width: var(--width-side);

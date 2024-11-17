@@ -6,7 +6,11 @@
                 <SiteLogo />
             </li>
             <li v-for="category in categories" :key="category.categoryId">
-                <router-link :to="`/category/${category.categoryId}`">{{ category.name }}</router-link>
+				<div v-if="isAdmin" class="admin-actions">
+					<button class="edit" title="Edit">Edit</button>
+					<button class="delete" title="Delete">Del</button>
+				</div>
+                <router-link :to="`/category/${category.categoryId}`">{{ category.name }}</router-link>				
             </li>
         </ul>
 
@@ -15,7 +19,7 @@
             <li>
                 <router-link :to="userLink">{{ userText }}</router-link>
             </li>
-            <li>
+            <li v-if="!isAdmin">
                 <router-link to="/cart" class="cart">
                     Cart <strong class="count">({{ cartCount }})</strong>
                 </router-link>
@@ -40,9 +44,12 @@ export default {
         };
     },
     computed: {
+		isAdmin() {
+			return User.isLoggedInAdmin();
+		},		
         userText() {
-            if (User.getUserEmailCode().email === Env.ADMIN_EMAIL) {
-                return 'Orders';
+            if (User.isLoggedInAdmin()) {
+                return 'Admin Dashboard';
             } else if (User.isLoggedIn()) {
                 return 'Profile';
             } else {
@@ -50,9 +57,7 @@ export default {
             }
         },
         userLink() {
-            if (User.getUserEmailCode().email === Env.ADMIN_EMAIL) {
-                return '/orders';
-            } else if (User.isLoggedIn()) {
+            if (User.isLoggedIn()) {
                 return '/profile';
             } else {
                 return '/login';
@@ -95,10 +100,42 @@ export default {
 		li {
 			display: flex;
 			align-items: stretch;
-
+			position: relative;
 			a {
 				display: flex;
 				align-items: center;
+			}
+
+			.admin-actions {
+				visibility: hidden;		
+				z-index: -1;		
+				position: absolute;
+				left: 0;
+				right: 0;
+				top: 0;
+				bottom: 0;
+				border: 1px dashed var(--primary-color);
+				button {
+					background-color: transparent;
+					padding: 2px;							
+					// font-weight: 200;
+					font-size: 0.5em;
+					border-radius: 0;
+					top: -2em;									
+					float: right;
+					&:hover {
+						background: var(--primary-color);
+						color: var(--white-bg-color)
+					}
+				}
+				button:last-child {
+					border-right: none;
+				}
+			}
+			&:hover {
+				.admin-actions {
+					visibility: visible;
+				}
 			}
 		}
 	}

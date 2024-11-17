@@ -13,6 +13,9 @@ const User = {
 	isLoggedIn() {
 		return !!localStorage.getItem(Env.K_EMAIL) && !!localStorage.getItem(Env.K_CODE);
 	},
+	isLoggedInAdmin() {
+		return this.isLoggedIn && this.getUserEmailCode().email == Env.ADMIN_EMAIL
+	},
 
 	// Login/Logout methods
 	login(email, code) {
@@ -30,6 +33,10 @@ const User = {
 	},
 	logoutAtLoginPage(router, productId) {		
 		this.logout();
+		if (!router) {
+			console.log("empty router")
+			return;
+		}
 		if (productId) {
 			router.push("/login/add-to-cart/" + productId);
 		} else {

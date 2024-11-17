@@ -20,7 +20,7 @@
 				<input type="text" placeholder="Validation Code" v-model="validationCode" required />
 				<button type="submit">Login</button>
 
-				<p>
+				<p class="resend">
 					Didn’t receive a code?
 					<a href="#" @click.prevent="resendCode">Resend Code</a>
 				</p>
@@ -83,14 +83,14 @@ export default {
 					this.errorMessage = data.message || 'Failed to send validation code.';
 				}
 			} catch (error) {
-				console.error('Network Error:', error);
+				console.log('Network Error:', error);
 				this.errorMessage = 'Network error. Please try again.';
 			} finally {
 				this.isLoading = false;
 			}
 		},
 
-		async login() {			
+		async login() {
 			this.errorMessage = '';
 			try {
 				const response = await fetch(Env.API_BASE_URL + '/users/verify-code', {
@@ -127,7 +127,7 @@ export default {
 				const data = await response.json();
 				this.errorMessage = data.message || 'Invalid validation code. Please try again.';
 			} catch (error) {
-				console.error('Network Error:', error);
+				console.log('Network Error:', error);
 				this.errorMessage = 'Network error. Please try again.';
 			}
 		},
@@ -146,6 +146,7 @@ export default {
 	// padding: var(--padding-container);
 	// border-radius: var(--border-radius);
 	max-width: var(--width-side);
+	box-sizing: content-box;
 	margin: 0 auto;
 	text-align: center;
 
@@ -156,24 +157,36 @@ export default {
 		h3 {
 			margin-top: 0;
 		}
+
+
+		input {
+			margin-bottom: var(--spacing-element);
+		}
+
+		button {
+			// position: relative;
+			width: 100%;
+		}
+
+		button[disabled] {
+			cursor: not-allowed;
+			opacity: 0.6;
+		}
+
 	}
-}
 
-input {
-	margin-bottom: var(--spacing-element);
-}
+	.resend {
+		font-size: 0.8em;
+		a {
+			color: var(--primary-color);
+			text-decoration: underline;
+		}
+	}
 
-button {
-	position: relative;
-}
 
-button[disabled] {
-	cursor: not-allowed;
-	opacity: 0.6;
-}
-
-.error {
-	color: var(--primary-color);
-	margin-top: var(--spacing-element);
+	.error {
+		color: var(--primary-color);
+		margin-top: var(--spacing-element);
+	}
 }
 </style>

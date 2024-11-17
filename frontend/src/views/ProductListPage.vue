@@ -25,6 +25,9 @@
 			<!-- Filter Sidebar -->
 			<div class="sidebar">
 				<div class="product-filters">
+					<div v-if="isAdmin()" class="admin-actions">
+						<button @click="addNewProduct" class="add-new-product">+ Add New Product</button>
+					</div>
 					<!-- Search Keywords -->
 					<input type="text" v-model="filters.keyword" placeholder="Search Keywords" class="search-input"
 						@input="onFilterChange" />
@@ -135,6 +138,16 @@ export default {
 		await this.fetchProducts(); // Fetch product list
 	},
 	methods: {
+		isAdmin() {
+			if (!this.$route.params.id) {
+				return false;
+			}
+			console.log(this.$route.params.id)
+			return User.isLoggedInAdmin();
+		},
+		addNewProduct() {
+			this.$router.push("/product/0")
+		},
 		formatCurrency(value) {
 			return Lib.formatCurrency(value);
 		},
@@ -334,9 +347,16 @@ export default {
 
 
 		}
-
+		
 	}
-
+	.add-new-product {
+		border-style: dashed;		
+		border-width: 2px;
+		width: 100%;
+		padding: 50px 0;
+		font-weight: 100;
+		font-size: 1.5em;
+	}
 
 	.clear-filter-button {
 		width: 100%;

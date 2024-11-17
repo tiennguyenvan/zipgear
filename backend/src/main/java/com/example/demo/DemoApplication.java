@@ -24,6 +24,7 @@ import com.example.demo.repository.OrderRepository;
 import com.example.demo.repository.ProductRepository;
 import com.example.demo.repository.RatingRepository;
 import com.example.demo.repository.UserRepository;
+import com.example.demo.service.Env;
 
 @SpringBootApplication
 public class DemoApplication {
@@ -51,6 +52,9 @@ public class DemoApplication {
 			orderRepository.deleteAll();
 
 
+            User adminUser = new User();
+			adminUser.setEmail(Env.ADMIN_EMAIL);
+			userRepository.save(adminUser);
             User mockUser = new User();
             mockUser.setEmail("a@a");
             mockUser.setAddresses(Arrays.asList("123 Mock St, Mock City, BC"));

@@ -16,6 +16,7 @@ public class Lib {
 	private static final Map<String, String> validationCodes = new ConcurrentHashMap<>();
 	private static final Map<String, String> activeSessions = new ConcurrentHashMap<>();
 	public static ResponseEntity<?> userRestResponseErr = null;
+	public static String loggedInEmail = "";
 
 	@Autowired
 	private static UserRepository userRepository;
@@ -51,8 +52,7 @@ public class Lib {
 	/// User validation
 	// --- Utility Method to Validate Session and Return User ---
 	public static User getRequestingUser(
-		Map<String, ?> request, UserRepository userRepository
-	) {
+			Map<String, ?> request, UserRepository userRepository) {
 		String email = (String) request.get("email");
 		String code = (String) request.get("code");
 
@@ -81,8 +81,12 @@ public class Lib {
 			userRestResponseErr = RestNotFound("User not found.");
 			return null;
 		}
-
+		loggedInEmail = email;
 		return user;
+	}
+
+	public static boolean isUserAdmin() {		
+		return loggedInEmail.equals(Env.ADMIN_EMAIL);
 	}
 
 	public static void storeValidationCode(String email, String code) {

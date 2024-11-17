@@ -8,6 +8,7 @@ import com.example.demo.config.OrderStatus;
 import com.example.demo.repository.CartRepository;
 import com.example.demo.repository.OrderRepository;
 import com.example.demo.repository.UserRepository;
+import com.example.demo.service.Env;
 import com.example.demo.service.Lib;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,32 +41,36 @@ public class OrderController {
 		if (user == null) {
 			return Lib.userRestResponseErr;
 		}
-		
+
+		if (Lib.isUserAdmin()) {
+			return ResponseEntity.ok(orderRepository.findAll());
+		}
+
 		return ResponseEntity.ok(orderRepository.findByUser(user));
 	}
 
 	@GetMapping("/orders/{orderId}")
 	public ResponseEntity<?> getOrderById(@PathVariable Long orderId, @RequestParam(required = true) String email,
-	@RequestParam(required = true) String code) {
+			@RequestParam(required = true) String code) {
 		// Validate the user
 		User user = Lib.getRequestingUser(email, code, userRepository);
 		if (user == null) {
 			return Lib.userRestResponseErr;
 		}
-	
+
 		// Retrieve the order by ID
 		Optional<Order> orderOpt = orderRepository.findById(orderId);
 		if (orderOpt.isEmpty()) {
 			return Lib.RestNotFound("Order not found");
 		}
-	
+
 		Order order = orderOpt.get();
-	
+
 		// Ensure the user can only access their own orders, unless they are admin
-		if (!order.getUser().equals(user) /*&& !user.isAdmin()*/) { // Assuming isAdmin() checks for admin status
+		if (!order.getUser().equals(user) /* && !user.isAdmin() */) { // Assuming isAdmin() checks for admin status
 			return Lib.RestUnauthorized("You are not authorized to view this order");
 		}
-	
+
 		return ResponseEntity.ok(order);
 	}
 
@@ -129,23 +134,36 @@ public class OrderController {
 		if (user == null) {
 			return Lib.userRestResponseErr;
 		}
+		String newStatus = (String) request.get("orderStatus");
+		if (newStatus.isEmpty()) {
+			return Lib.RestBadRequest("Invalid Status");
+		}
 
 		Optional<Order> orderOpt = orderRepository.findById(orderId);
+
 		if (orderOpt.isEmpty()) {
 			return Lib.RestNotFound("Order not found.");
 		}
 
 		Order order = orderOpt.get();
 
-		// Check if the order is in a cancelable state (PROCESSING)
+		if (Lib.isUserAdmin()) {
+			try {
+				order.setOrderStatus(OrderStatus.valueOf(newStatus));
+			} catch (IllegalArgumentException e) {
+				return Lib.RestBadRequest("Invalid order status.");
+			}
+			orderRepository.save(order);
+			return Lib.RestOk("Order status updated successfully.");
+		}
+
 		if (order.getOrderStatus() != OrderStatus.PROCESSING) {
 			return Lib.RestBadRequest("Order cannot be canceled as it is already " + order.getOrderStatus());
 		}
 
 		order.setOrderStatus(OrderStatus.CANCELLED);
+		orderRepository.save(order);
 		return Lib.RestOk("Order has been canceled successfully.");
-
-		// @fixme: admin can change status to other types
 	}
 
 	// DELETE: Delete an order by ID

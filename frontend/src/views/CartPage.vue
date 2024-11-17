@@ -42,7 +42,6 @@
 				<input type="text" id="address" v-model="userAddress" placeholder="Enter delivery address"
 					@input="validateAddress" />
 				<div class="saved-addresses">
-					<p>Saved Addresses:</p>
 					<ul>
 						<li v-for="(address, index) in addresses" :key="index">
 							{{ address }}
@@ -174,6 +173,7 @@ export default {
 
 				this.cartItems = []; // Clear the cart
 				this.userAddress = ""; // Clear the address
+				this.$router.push("/profile")
 			} catch (error) {
 				console.error("Failed to place order:", error);
 				alert("Failed to place the order. Please try again.");
@@ -301,26 +301,28 @@ export default {
 		width: 100%;
 	}
 
-}
+
+	.saved-addresses {
+		ul {
+			list-style: none;
+			padding: 0;
+		}
+
+		li {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 0.5em;
+		}
+
+		.select-btn {
+			margin-left: 1em;
+			padding: 0;
+			border: none;
+			background: none;
+		}
+	}
 
 
-.saved-addresses ul {
-	list-style: none;
-	padding: 0;
-}
-
-.saved-addresses li {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	margin-bottom: 0.5em;
-}
-
-.select-btn {
-	margin-left: 1em;
-	padding: 0.3em 0.6em;
-	border: 1px solid var(--border-color);
-	background-color: var(--background-color);
-	cursor: pointer;
 }
 </style>
