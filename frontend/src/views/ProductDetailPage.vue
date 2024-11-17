@@ -1,77 +1,72 @@
 <template>
-    <div class="wide">
-        <NavBar />
-        <div class="card flex wrapper product-details">
-            <div class="main flex feature-image-wrapper">
-                <img :src="selectedFeatureImage" alt="Product Feature Image" class="feature-image" />
-                <div class="flex thumbnail-wrapper">
-                    <img
-                        v-for="(image, index) in productDetails.imageSrcs"
-                        :key="index"
-                        :src="image"
-                        :class="{ 'active-thumbnail': selectedFeatureImage === image }"
-                        @click="selectImage(image)"
-                        class="thumbnail"
-                        alt="Thumbnail"
-                    />
-                </div>
-            </div>
-            <div class="sidebar flex product-info">
-                <h2 class="name">{{ productDetails.title }}</h2>
-                <p class="price">{{ formatCurrency(productDetails.price) }}</p>
-                <p class="description">{{ productDetails.description }}</p>
+	<div class="wide">
+		<NavBar />
+		<div class="card flex wrapper product-details">
+			<div class="main flex feature-image-wrapper">
+				<img :src="selectedFeatureImage" alt="Product Feature Image" class="feature-image" />
+				<div class="flex thumbnail-wrapper">
+					<img v-for="(image, index) in productDetails.imageSrcs" :key="index" :src="image"
+						:class="{ 'active-thumbnail': selectedFeatureImage === image }" @click="selectImage(image)"
+						class="thumbnail" alt="Thumbnail" />
+				</div>
+			</div>
+			<div class="sidebar flex product-info">
+				<h2 class="name">{{ productDetails.title }}</h2>
+				<p class="price">{{ formatCurrency(productDetails.price) }}</p>
+				<p class="description">{{ productDetails.description }}</p>
 
-                <!-- Add to Cart Button -->
-                <button class="primary-btn add-to-cart" @click="addToCart">
-                    {{ addToCartButtonText}}
-                </button>
+				<!-- Add to Cart Button -->
+				<button class="primary-btn add-to-cart" @click="addToCart">
+					{{ addToCartButtonText }}
+				</button>
 
-                <!-- Ratings and Reviews Section -->
-                <div class="rating">
-                    <p class="rating-score">
-                        {{ productDetails.averageRating }}★ /
-                        <span class="rating-length">{{ productDetails.reviews?.length || 0 }} ratings</span>
-                    </p>
-                    <div class="reviews">
-                        <div v-for="(review, index) in productDetails.reviews" :key="index" class="user-review">
-                            <div class="review-header">
-                                <div class="review-rating">
-                                    <span
-                                        v-for="star in 5"
-                                        :key="star"
-                                        :class="{ 'filled': star <= review.rating, 'unfilled': star > review.rating }"
-                                        >★</span
-                                    >
-                                </div>
-                                <strong class="review-user">{{ review.name }}</strong>
-                            </div>
-                            <p class="review-comment">{{ review.comment }}</p>
-                        </div>
-                    </div>
+				<!-- Ratings and Reviews Section -->
+				<div class="rating">
+					<p class="rating-score">
+						{{ productDetails.averageRating }}★ /
+						<span class="rating-length">{{ productDetails.reviews?.length || 0 }} ratings</span>
+					</p>
+					<!-- <div class="reviews">
+						<div v-for="(review, index) in productDetails.reviews" :key="index" class="user-review">
+							<div class="review-header">
+								<div class="review-rating">
+									<span v-for="star in 5" :key="star"
+										:class="{ 'filled': star <= review.rating, 'unfilled': star > review.rating }">★</span>
+								</div>
+								<strong class="review-user">{{ review.name }}</strong>
+							</div>
+							<p class="review-comment">{{ review.comment }}</p>
+						</div>
+					</div> -->
+					<div class="reviews">
+						<div v-for="(review, index) in productDetails.reviews" :key="index" class="user-review">
+							<div class="review-header">
+								<div class="review-rating">
+									<span v-for="star in 5" :key="star"
+										:class="{ 'filled': star <= review.rating, 'unfilled': star > review.rating }">★</span>
+								</div>
+								<strong class="review-user">{{ review.user.email }}</strong>
+							</div>
+							<p class="review-comment">{{ review.ratingDescription }}</p>
+						</div>
+					</div>
 
-                    <!-- Add New Review Section -->
-                    <div class="add-review">
-                        <button class="add-rating-btn" @click="submitReview">Add Your Rating</button>
-                        <div class="star-rating">
-                            <span
-                                v-for="star in 5"
-                                :key="star"
-                                @click="newReview.rating = star"
-                                :class="{ 'selected': star <= newReview.rating }"
-                                >★</span
-                            >
-                            <h4 class="review-user-name">Tim Nguyen</h4>
-                        </div>
-                        <textarea
-                            v-model="newReview.comment"
-                            placeholder="Your review here..."
-                            required
-                        ></textarea>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+
+					<!-- Add New Review Section -->
+					<div v-if="canAddReview" class="add-review">
+						<div class="star-rating">
+							<span v-for="star in 5" :key="star" @click="newReview.rating = star"
+								:class="{ 'selected': star <= newReview.rating }">★</span>
+							<h4 class="review-user-name">Tim Nguyen</h4>
+						</div>
+						<textarea class="review-content-input" v-model="newReview.comment"
+							placeholder="Your review here..." required></textarea>
+						<button class="add-rating-btn" @click="submitReview">Add Your Rating</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </template>
 
 <script>
@@ -82,69 +77,123 @@ import User from "@/utils/User";
 import Lib from "@/utils/Lib";
 
 export default {
-    name: "ProductDetailPage",
-    components: {
-        NavBar,
-    },
-    data() {
-        return {
-            productId: null,
-            productDetails: {},
-            selectedFeatureImage: "",
+	name: "ProductDetailPage",
+	components: {
+		NavBar,
+	},
+	data() {
+		return {
+			productId: null,
+			productDetails: {},
+			selectedFeatureImage: "",
 			addToCartButtonText: "Add to Cart",
-            newReview: {
-                comment: "",
-                rating: 0,
-                user: "Tim Nguyen",
-            },
-        };
-    },    
-    async created() {
-        this.productId = parseInt(this.$route.params.id, 10); // Ensure the productId is a number
-        await User.init(); 
-        await this.fetchProductDetails(this.productId); // Fetch product details
+			newReview: {
+				comment: "",
+				rating: 0,
+				user: "Tim Nguyen",
+			},
+			canAddReview: false,
+		};
+	},
+	async created() {
+		this.productId = parseInt(this.$route.params.id, 10); // Ensure the productId is a number
+		await User.init();
+		await this.fetchProductDetails(this.productId); // Fetch product details
 		this.updateAddToCartText();
-    },
-    methods: {
-        formatCurrency(value) {
-            return Lib.formatCurrency(value);
-        },
-        async fetchProductDetails(id) {
-            try {
-                const response = await axios.get(`${Env.API_BASE_URL}/products/${id}`);
-                this.productDetails = response.data;
-                this.selectedFeatureImage = this.productDetails.imageSrcs[0]; // Set initial image
-            } catch (error) {
-                console.error("Error fetching product details:", error);
-            }
-        },
-        selectImage(image) {
-            this.selectedFeatureImage = image; // Update the main image on thumbnail click
-        },
-        submitReview() {
-            if (this.newReview.comment.trim() && this.newReview.rating > 0) {
-                this.productDetails.reviews.push({
-                    name: this.newReview.user,
-                    rating: this.newReview.rating,
-                    comment: this.newReview.comment.trim(),
-                });
-                this.newReview.comment = "";
-                this.newReview.rating = 0;
-            }
-        },
-        async addToCart() {
-            try {
-                await User.addToCart(this.productId, this.$router); // Add product to the cart
-            } catch (error) {
-                console.error("Error adding product to cart:", error);
-            }
-            this.updateAddToCartText(); // Update button text after adding to cart
-        },
+	},
+	methods: {
+		formatCurrency(value) {
+			return Lib.formatCurrency(value);
+		},
+		// async fetchProductDetails(id) {
+		//     try {
+		//         const response = await axios.get(`${Env.API_BASE_URL}/products/${id}`);
+		//         this.productDetails = response.data;
+		//         this.selectedFeatureImage = this.productDetails.imageSrcs[0]; // Set initial image
+		//     } catch (error) {
+		//         console.error("Error fetching product details:", error);
+		//     }
+		// },
+		async fetchProductDetails(id) {
+			try {
+				const response = await axios.get(`${Env.API_BASE_URL}/products/${id}`);
+				const ratingsResponse = await axios.get(`${Env.API_BASE_URL}/ratings/${id}`);
+
+				// Filter out ratings with `ratingStars === 0` for display
+				const filteredReviews = ratingsResponse.data.filter((rating) => rating.ratingStars > 0);
+
+				this.productDetails = {
+					...response.data,
+					reviews: filteredReviews, // Display only non-placeholder reviews
+				};
+				this.selectedFeatureImage = this.productDetails.imageSrcs[0]; // Set initial image
+
+				// Check if the current user has a placeholder review (0 stars)
+				const currentUserReview = ratingsResponse.data.find(
+					(rating) => rating.ratingStars === 0 && rating.user.email === User.getUserEmailCode().email
+				);				
+
+				if (currentUserReview) {
+					this.newReview = {
+						comment: currentUserReview.ratingDescription || "", // Placeholder description
+						rating: 0, // Allow user to update
+						user: User.email,
+					};
+					this.canAddReview = true; // Allow user to add/update review
+					console.log("Updated Review Permission")					
+				}
+			} catch (error) {
+				console.error("Error fetching product details:", error);
+			}
+		}
+		,
+
+		selectImage(image) {
+			this.selectedFeatureImage = image; // Update the main image on thumbnail click
+		},
+		// submitReview() {
+		// 	if (this.newReview.comment.trim() && this.newReview.rating > 0) {
+		// 		this.productDetails.reviews.push({
+		// 			name: this.newReview.user,
+		// 			rating: this.newReview.rating,
+		// 			comment: this.newReview.comment.trim(),
+		// 		});
+		// 		this.newReview.comment = "";
+		// 		this.newReview.rating = 0;
+		// 	}
+		// },
+
+		async submitReview() {
+			if (this.newReview.rating > 0 && this.newReview.comment.trim()) {
+				try {
+					await axios.put(`${Env.API_BASE_URL}/ratings/${this.productId}`, {
+						ratingStars: this.newReview.rating,
+						ratingDescription: this.newReview.comment,
+						... User.getUserEmailCode()
+					});
+					// alert("Your review has been submitted!");
+					await this.fetchProductDetails(this.productId); // Refresh product details
+					this.canAddReview = false
+				} catch (error) {
+					console.error("Error submitting review:", error);
+				}
+			} else {
+				alert("Please provide a rating and a comment.");
+			}
+		},
+		async addToCart() {
+			try {
+				await User.addToCart(this.productId, this.$router); // Add product to the cart
+			} catch (error) {
+				console.error("Error adding product to cart:", error);
+			}
+			this.updateAddToCartText(); // Update button text after adding to cart
+		},
 		updateAddToCartText() {
 			// Dynamically update the button text based on cart state
-            this.addToCartButtonText = User.getAddToCartText(this.productId);
+			this.addToCartButtonText = User.getAddToCartText(this.productId);
 		},
-    },
+	},
 };
 </script>
 
@@ -194,7 +243,7 @@ export default {
 		flex: 1;
 		flex-direction: column;
 		gap: 1em;
-		align-items: start;
+		align-items: stretch;
 		justify-content: start;
 
 		.name {
@@ -234,9 +283,7 @@ export default {
 
 		.review-rating {
 			display: flex;
-			margin-right: 8px;
-			/* Space between stars and username */
-			margin-bottom: var(--spacing-element-small);
+			margin-right: 8px;						
 			color: var(--primary-color);
 			font-weight: var(--font-weight-button);
 
@@ -246,13 +293,13 @@ export default {
 			}
 
 			.filled {
-				color: #C21715
-					/* Gold color for filled stars */
+				color: var(--primary-color);
+
 			}
 
 			.unfilled {
-				color: #d3d3d3;
-				/* Grey color for unfilled stars */
+				color: var(--light-text-color);
+
 			}
 		}
 
@@ -281,20 +328,13 @@ export default {
 
 		/* Add Your Rating Button */
 		.add-rating-btn {
-			background: none;
-			color: var(--primary-color);
-			border: none;
-			cursor: pointer;
-			font-size: var(--font-size-content);
-			font-weight: var(--font-weight-button);
-			margin-top: var(--spacing-element-small);
+			// padding: 0;
+			// background: none;			
+			// border: none;	
+			width: 100%;
 		}
 
-		.add-rating-btn:hover {
-			text-decoration: underline;
-		}
-
-		textarea {
+		textarea.review-content-input {
 			width: 100%;
 			padding: var(--spacing-element-small);
 			font-size: var(--font-size-input);
@@ -307,26 +347,22 @@ export default {
 		}
 
 		.add-review {
-			margin-top: var(--spacing-element);
-			padding-top: var(--spacing-element-small);
-
 			.star-rating {
 				display: flex;
 				align-items: center;
 				/* Aligns items vertically centered */
-				margin-bottom: var(--spacing-element-small);
 				cursor: pointer;
+				color: var(--light-text-color);
 
 				.star {
-					color: #C21715;
+					color: var(--primary-color);
 					/* Primary color for stars */
 					font-size: var(--font-size-content);
 					margin-right: 4px;
 				}
 
 				.selected {
-					color: #C21715;
-					/* Color for selected stars */
+					color: var(--primary-color);
 				}
 
 				.review-user-name {

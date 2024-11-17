@@ -44,11 +44,13 @@
 				<div class="saved-addresses">
 					<ul>
 						<li v-for="(address, index) in addresses" :key="index">
-							{{ address }}
-							<button class="select-btn" :disabled="address === userAddress"
-								@click="selectAddress(address)">
-								Select
-							</button>
+							<div v-if="address !== userAddress">
+								{{ address }}
+								<button class="select-btn" :disabled="address === userAddress"
+									@click="selectAddress(address)">
+									Select
+								</button>
+							</div>
 						</li>
 					</ul>
 				</div>

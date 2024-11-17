@@ -73,6 +73,9 @@ public class RatingController {
 		}
 
 		Integer ratingStars = (Integer) request.get("ratingStars");
+		if (ratingStars < 0 || ratingStars > 5) {
+			return Lib.RestBadRequest("Invalid rating stars");
+		}
 		String ratingDescription = (String) request.get("ratingDescription");
 		Rating rating = new Rating(product, user, ratingStars, ratingDescription);
 		ratingRepository.save(rating);

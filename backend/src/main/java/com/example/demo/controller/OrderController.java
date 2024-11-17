@@ -3,10 +3,14 @@ package com.example.demo.controller;
 import com.example.demo.model.Cart;
 import com.example.demo.model.CartItem;
 import com.example.demo.model.Order;
+import com.example.demo.model.Product;
+import com.example.demo.model.Rating;
 import com.example.demo.model.User;
 import com.example.demo.config.OrderStatus;
 import com.example.demo.repository.CartRepository;
 import com.example.demo.repository.OrderRepository;
+import com.example.demo.repository.ProductRepository;
+import com.example.demo.repository.RatingRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.Env;
 import com.example.demo.service.Lib;
@@ -28,7 +32,13 @@ public class OrderController {
 	private OrderRepository orderRepository;
 
 	@Autowired
+	private ProductRepository productRepository;
+
+	@Autowired
 	private UserRepository userRepository;
+
+	@Autowired
+	private RatingRepository ratingRepository;
 
 	@Autowired
 	private CartRepository cartRepository;
@@ -97,27 +107,40 @@ public class OrderController {
 		}
 
 		// Build the product list JSON from cart items
-		StringBuilder productListJsonBuilder = new StringBuilder("[");
+		// StringBuilder productListJsonBuilder = new StringBuilder("[");
 		BigDecimal totalPrice = BigDecimal.ZERO;
 
 		for (CartItem item : cart.getItems()) {
 			BigDecimal itemTotalPrice = item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
 			totalPrice = totalPrice.add(itemTotalPrice);
 
-			productListJsonBuilder.append("{")
-					.append("\"title\": \"").append(item.getProduct().getTitle()).append("\",")
-					.append("\"quantity\": ").append(item.getQuantity()).append(",")
-					.append("\"price\": ").append(item.getProduct().getPrice())
-					.append("},");
+			// productListJsonBuilder.append("{")
+			// .append("\"id\": \"").append(item.getProduct().getProductId()).append("\",")
+			// .append("\"title\": \"").append(item.getProduct().getTitle()).append("\",")
+			// .append("\"quantity\": ").append(item.getQuantity()).append(",")
+			// .append("\"price\": ").append(item.getProduct().getPrice())
+			// .append("},");
 		}
 
 		// Remove the last comma and close the JSON array
-		if (productListJsonBuilder.charAt(productListJsonBuilder.length() - 1) == ',') {
-			productListJsonBuilder.deleteCharAt(productListJsonBuilder.length() - 1);
-		}
-		productListJsonBuilder.append("]");
+		// if (productListJsonBuilder.charAt(productListJsonBuilder.length() - 1) ==
+		// ',') {
+		// productListJsonBuilder.deleteCharAt(productListJsonBuilder.length() - 1);
+		// }
+		// productListJsonBuilder.append("]");
 
-		Order newOrder = new Order(user, productListJsonBuilder.toString(), deliveryAddress, totalPrice);
+		// Order newOrder = new Order(user, productListJsonBuilder.toString(),
+		// deliveryAddress, totalPrice);
+		// Create a new order and use setProductList to encode the cart items
+		Order newOrder = new Order();
+		newOrder.setUser(user);
+		newOrder.setProductList(cart.getItems()); // Encode cart items as JSON
+		newOrder.setDeliveryAddress(deliveryAddress);
+		newOrder.setTotalPrice(totalPrice);
+		newOrder.setOrderStatus(OrderStatus.PROCESSING); // Set the default status
+
+		orderRepository.save(newOrder);
+
 		orderRepository.save(newOrder);
 
 		// Clear the user's cart after placing the order
@@ -149,12 +172,32 @@ public class OrderController {
 
 		if (Lib.isUserAdmin()) {
 			try {
-				order.setOrderStatus(OrderStatus.valueOf(newStatus));
+				OrderStatus updatedStatus = OrderStatus.valueOf(newStatus);
+				order.setOrderStatus(updatedStatus);
+
+				// If the order is marked as DELIVERED, create placeholder reviews
+				if (updatedStatus == OrderStatus.DELIVERED) {
+					List<CartItem> productList = order.getProductList();
+					for (CartItem cartItem : productList) {
+						Long productId = cartItem.getProduct().getProductId();
+						Product product = productRepository.findById(productId).orElse(null);
+
+						if (product != null) {
+							// Check if the user already has a review for this product
+							if (ratingRepository.findByUserAndProduct(order.getUser(), product).isEmpty()) {
+								Rating placeholderRating = new Rating(product, order.getUser(), 0, "");
+								ratingRepository.save(placeholderRating);
+							}
+						}
+					}
+				}
 			} catch (IllegalArgumentException e) {
 				return Lib.RestBadRequest("Invalid order status.");
 			}
+
 			orderRepository.save(order);
 			return Lib.RestOk("Order status updated successfully.");
+
 		}
 
 		if (order.getOrderStatus() != OrderStatus.PROCESSING) {
@@ -167,12 +210,12 @@ public class OrderController {
 	}
 
 	// DELETE: Delete an order by ID
-	@DeleteMapping("/orders/{orderId}")
-	public ResponseEntity<?> deleteOrder(@PathVariable Long orderId) {
-		// @fixme: only admin can delete
-		if (orderRepository.existsById(orderId)) {
-			orderRepository.deleteById(orderId);
-		}
-		return Lib.RestOk("Order deleted successfully.");
-	}
+	// @DeleteMapping("/orders/{orderId}")
+	// public ResponseEntity<?> deleteOrder(@PathVariable Long orderId) {
+	// // @fixme: only admin can delete
+	// if (orderRepository.existsById(orderId)) {
+	// orderRepository.deleteById(orderId);
+	// }
+	// return Lib.RestOk("Order deleted successfully.");
+	// }
 }

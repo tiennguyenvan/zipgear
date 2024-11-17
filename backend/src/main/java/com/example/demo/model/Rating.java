@@ -2,9 +2,6 @@ package com.example.demo.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
@@ -28,7 +25,6 @@ public class Rating {
 
     @Column(length = 500)
     private String ratingDescription;
-
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

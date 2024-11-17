@@ -127,10 +127,7 @@ export default {
 			}
 		},
 		isAdmin() {
-			if (!this.$route.params.id) {
-				return false;
-			}
-			console.log(this.$route.params.id)
+		
 			return User.isLoggedInAdmin();
 		},
 		async fetchUserData() {

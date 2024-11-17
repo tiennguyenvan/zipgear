@@ -11,8 +11,11 @@ import org.springframework.http.ResponseEntity;
 
 import com.example.demo.model.User;
 import com.example.demo.repository.UserRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Lib {
+	private static final ObjectMapper objectMapper = new ObjectMapper();
+
 	private static final Map<String, String> validationCodes = new ConcurrentHashMap<>();
 	private static final Map<String, String> activeSessions = new ConcurrentHashMap<>();
 	public static ResponseEntity<?> userRestResponseErr = null;
@@ -151,4 +154,5 @@ public class Lib {
 				parts[2].trim().length() == 2; // Province name = 2 chars
 
 	}
+
 }
