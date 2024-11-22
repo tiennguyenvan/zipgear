@@ -1,7 +1,9 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.Category;
+import com.example.demo.model.User;
 import com.example.demo.repository.CategoryRepository;
+import com.example.demo.repository.UserRepository;
 import com.example.demo.service.Lib;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import org.springframework.util.StringUtils;
 
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.time.LocalDateTime;
 // @fixme: only admin can use category CRUD
@@ -22,14 +25,17 @@ public class CategoryController {
 	@Autowired
 	private CategoryRepository categoryRepository;
 
-	// 1. Get all categories
+	@Autowired
+	private UserRepository userRepository;
+
+	// Get all categories
 	@GetMapping("/categories")
 	public ResponseEntity<List<Category>> getAllCategories() {
 		List<Category> categories = categoryRepository.findAll();
 		return ResponseEntity.ok(categories);
 	}
 
-	// 2. Get a category by ID
+	// Get a category by ID
 	@GetMapping("/categories/{id}")
 	public ResponseEntity<Category> getCategoryById(@PathVariable Long id) {
 		Optional<Category> category = categoryRepository.findById(id);
@@ -37,59 +43,82 @@ public class CategoryController {
 				.orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
 	}
 
-	// 3. Create a new category
+	// Create a new category
 	@PostMapping("/categories")
-	public ResponseEntity<?> createCategory(@RequestBody Category category) {
-		// Check if the name is provided
-		if (!StringUtils.hasText(category.getName())) {
-			return ResponseEntity.badRequest().body(Lib.RestMsg("Name is required."));
+	public ResponseEntity<?> createCategory(@RequestBody Map<String, Object> request) {
+		User user = Lib.getRequestingUser(request, userRepository);
+		if (user == null) {
+			return Lib.userRestResponseErr;
 		}
 
-		// Check if the category name already exists (optional, if names should be
-		// unique)
-		if (categoryRepository.existsByName(category.getName())) {
-			return ResponseEntity.badRequest().body(Lib.RestMsg("Category with this name already exists."));
+		String name = (String) request.get("name");
+		if (name.isEmpty()) {
+			return Lib.RestBadRequest("Name is required");
 		}
 
-		// Create and save the new category		
+		if (!Lib.isUserAdmin()) {
+			return Lib.RestUnauthorized("No permission to create categories");
+		}
+		
+		if (categoryRepository.existsByName(name)) {
+			return Lib.RestBadRequest("Category with this name already exists.");
+		}
+		
+		Category category = new Category(name);		
 		category.setUpdatedAt(LocalDateTime.now());
 		Category savedCategory = categoryRepository.save(category);
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(savedCategory);
+		return ResponseEntity.status(HttpStatus.CREATED).body(savedCategory);		
 	}
 
-	// 4. Update a category by ID
+	// Update a category by ID
 	@PutMapping("/categories/{id}")
-	public ResponseEntity<Category> updateCategory(@PathVariable Long id, @RequestBody Category categoryDetails) {
-		Optional<Category> categoryOptional = categoryRepository.findById(id);
+    public ResponseEntity<?> updateCategory(@PathVariable Long id, @RequestBody Map<String, Object> request) {
+        User user = Lib.getRequestingUser(request, userRepository);
+        if (user == null) {
+            return Lib.userRestResponseErr;
+        }
 
-		if (categoryOptional.isPresent()) {
-			Category existingCategory = categoryOptional.get();
-			existingCategory.setName(categoryDetails.getName());
-			existingCategory.setUpdatedAt(LocalDateTime.now());
+        String newName = (String) request.get("name");
+        if (newName == null || newName.isEmpty()) {
+            return Lib.RestBadRequest("Name is required.");
+        }
 
-			Category updatedCategory = categoryRepository.save(existingCategory);
-			return ResponseEntity.ok(updatedCategory);
-		} else {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-		}
-	}
+        if (!Lib.isUserAdmin()) {
+            return Lib.RestUnauthorized("No permission to update categories.");
+        }
 
-	// // 5. Delete all categories
-	// @DeleteMapping("/categories")
-	// public ResponseEntity<?> deleteAllCategories() {		
-	// 	categoryRepository.deleteAll();
-	// 	return Lib.RestOk("All categories deleted successfully.");
-	// }
+        Optional<Category> categoryOptional = categoryRepository.findById(id);
+        if (categoryOptional.isEmpty()) {
+            return Lib.RestNotFound("Category not found.");
+        }
 
-	// 6. Delete a category by ID
+        Category existingCategory = categoryOptional.get();
+        existingCategory.setName(newName);
+        existingCategory.setUpdatedAt(LocalDateTime.now());
+
+        Category updatedCategory = categoryRepository.save(existingCategory);
+        return ResponseEntity.ok(updatedCategory);
+    }
+
+	// Delete a category by ID
 	@DeleteMapping("/categories/{id}")
-	public ResponseEntity<?> deleteCategoryById(@PathVariable Long id) {
-		if (categoryRepository.existsById(id)) {
-			categoryRepository.deleteById(id);
-			return Lib.RestOk("Category deleted successfully.");
-		} else {
-			return Lib.RestNotFound("Category not found.");
-		}
-	}
+    public ResponseEntity<?> deleteCategoryById(@PathVariable Long id, @RequestHeader("X-User-Email") String email,
+	@RequestHeader("X-User-Code") String code) {
+        User user = Lib.getRequestingUser(email, code, userRepository);
+        if (user == null) {
+            return Lib.userRestResponseErr;
+        }
+
+        if (!Lib.isUserAdmin()) {
+            return Lib.RestUnauthorized("No permission to delete categories.");
+        }
+
+        if (!categoryRepository.existsById(id)) {
+            return Lib.RestNotFound("Category not found.");
+        }
+
+        categoryRepository.deleteById(id);
+        return Lib.RestOk("Category deleted successfully.");
+    }
 }
