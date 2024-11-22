@@ -162,29 +162,26 @@ public class ProductController {
 		product.setStock(stock);
         product = productRepository.save(product);
 
-        // Save uploaded images        
-		System.out.println("Upload directory: " + uploadDir.toAbsolutePath());
-		if (images == null || images.isEmpty()) {
-			System.out.println("No images received");
-			return Lib.RestBadRequest("At least one feaature image is required!");
-		} else {
-			for (MultipartFile image : images) {
-				System.out.println("Image received: " + image.getOriginalFilename());
-				String filename = product.getProductId() + "_" + image.getOriginalFilename();
-				System.out.println("Saving file: " + filename);
-			}
-		}
-				
-		
-		List<String> imageUrls;
+        // debug uploaded images        
+		// System.out.println("Upload directory: " + uploadDir.toAbsolutePath());
+		// if (images == null || images.isEmpty()) {
+		// 	System.out.println("No images received");
+		// 	return Lib.RestBadRequest("At least one feaature image is required!");
+		// } else {
+		// 	for (MultipartFile image : images) {
+		// 		System.out.println("Image received: " + image.getOriginalFilename());
+		// 		String filename = product.getProductId() + "_" + image.getOriginalFilename();
+		// 		System.out.println("Saving file: " + filename);
+		// 	}
+		// }
+					
 		try {
-			imageUrls = saveUploadedImages(images, product.getProductId());
-			product.setImageSrcs(imageUrls);
+			List<String> imageUrls = saveUploadedImages(images, product.getProductId());
+			product.setImageSrcs(imageUrls);			
 		} catch (RuntimeException e) {
 			return Lib.RestBadRequest("Error uploading images: " + e.getMessage());
 		}
-
-        product.setImageSrcs(imageUrls);
+        
         productRepository.save(product);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(product);
@@ -234,22 +231,21 @@ public class ProductController {
 
         // Remove deleted images
         if (removedImages != null && !removedImages.isEmpty()) {
-            for (String imageUrl : removedImages) {
-                deleteFile(imageUrl);
-                product.getImageSrcs().remove(imageUrl);
-            }
-        }
-
-        // Save new uploaded images
-		List<String> newImageUrls;
-		try {
-			newImageUrls = saveUploadedImages(images, product.getProductId());
-			product.setImageSrcs(newImageUrls);
-		} catch (RuntimeException e) {
-			return Lib.RestBadRequest("Error uploading images: " + e.getMessage());
+			for (String imageUrl : removedImages) {
+				// System.out.println("Image : " +imageUrl);
+				deleteFile(imageUrl); // Delete from the file system
+				product.getImageSrcs().remove(imageUrl); // Remove from product
+			}
 		}
-
-        product.getImageSrcs().addAll(newImageUrls);
+		// Handle new uploaded images
+		if (images != null && !images.isEmpty()) {
+			try {
+				List<String> newImageUrls = saveUploadedImages(images, product.getProductId());
+				product.getImageSrcs().addAll(newImageUrls);
+			} catch (RuntimeException e) {
+				return Lib.RestBadRequest("Error uploading images: " + e.getMessage());
+			}
+		}
 
         productRepository.save(product);
         return ResponseEntity.ok(product);
@@ -273,9 +269,20 @@ public class ProductController {
 
         // Delete associated files
         Product product = productOptional.get();
-        for (String imageUrl : product.getImageSrcs()) {
-            deleteFile(imageUrl);
-        }
+        
+
+		// Delete associated image files
+		if (product.getImageSrcs() != null) {
+			for (String imageUrl : product.getImageSrcs()) {
+				try {
+					deleteFile(imageUrl); // Call deleteFile method
+					// System.out.println("Deleted image file: " + imageUrl);
+				} catch (Exception e) {
+					// System.err.println("Failed to delete image file: " + imageUrl + ". Error: " + e.getMessage());
+				}
+			}
+		}
+	
 
         productRepository.delete(product);
         return Lib.RestOk("Product deleted successfully.");
@@ -287,7 +294,7 @@ public class ProductController {
 			try {
 				if (!Files.exists(uploadDir)) {
 					Files.createDirectories(uploadDir); // Ensure the directory exists
-					System.out.println("Created directory: " + uploadDir.toAbsolutePath());
+					// System.out.println("Created directory: " + uploadDir.toAbsolutePath());
 				}
 	
 				for (MultipartFile image : images) {
@@ -300,27 +307,40 @@ public class ProductController {
 					Path filePath = uploadDir.resolve(filename);
 					Files.write(filePath, image.getBytes());
 					savedImageUrls.add("uploads/" + filename); // Save as a relative path
-					System.out.println("Saved file: " + filePath.toAbsolutePath());
+					// System.out.println("Saved file: " + filePath.toAbsolutePath());
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RuntimeException("Failed to save images.", e);
 			}
 		} else {
-			System.out.println("No images to save");
+			// System.out.println("No images to save");
 		}
 		return savedImageUrls;
 	}
 	
-	
 
     private void deleteFile(String filePath) {
+		// System.out.println("Deleting /" + filePath + "/");
+		if (filePath.startsWith("http") || filePath.contains("zipgear-demo-image")) {
+			return;
+		}
+
 		try {
-			Path fullPath = Paths.get(filePath).isAbsolute() ? Paths.get(filePath) : uploadDir.resolve(filePath);
-			Files.deleteIfExists(fullPath);
+			// Ensure the path is correctly resolved
+			Path fullPath = filePath.startsWith("uploads/") 
+					? uploadDir.resolve(filePath.substring("uploads/".length())) // Remove duplicate "uploads/"
+					: uploadDir.resolve(filePath);
+	
+			if (Files.exists(fullPath)) {
+				Files.delete(fullPath); // Delete the file
+				// System.out.println("File successfully deleted: " + fullPath.toAbsolutePath());
+			} else {
+				// System.out.println("File not found, skipping deletion: " + fullPath.toAbsolutePath());
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException("Failed to delete file: " + filePath, e);
 		}
-	}	
+	}		
 }

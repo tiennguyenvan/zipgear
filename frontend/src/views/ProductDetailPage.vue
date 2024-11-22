@@ -7,7 +7,7 @@
 
 				<div class="flex thumbnail-wrapper">
 					<div class="thumbnail" v-for="(image, index) in productDetails.imageSrcs" :key="index"
-						:class="{ 'active-thumbnail': selectedFeatureImage === image }">
+						:class="{ 'active-thumbnail': selectedFeatureImage === imageSrc(image) }">
 						<img :src="imageSrc(image)" class="thumbnail" alt="Thumbnail"
 							@click="selectImage(image.url || image)" />
 
@@ -49,7 +49,7 @@
 					</li>
 				</ul>
 
-				<button class="primary-btn add-to-cart" @click="addToCart">
+				<button v-if="!isAdmin() || isEditorEnabled()" class="primary-btn add-to-cart" @click="addToCart">
 					{{ addToCartButtonText }}
 				</button>
 
@@ -153,6 +153,7 @@ export default {
 			await this.fetchProductDetails(this.productId);
 			this.selectedFeatureImage = this.productDetails.imageSrcs?.[0] ? this.imageSrc(this.productDetails.imageSrcs[0]) : require("@/assets/img/mock-feature-image.jpg");
 			this.updateAddToCartText();
+			console.log("Product Images:", this.productDetails.imageSrcs);
 		}
 	},
 	methods: {
@@ -219,7 +220,7 @@ export default {
 		}
 		,
 		selectImage(image) {
-			this.selectedFeatureImage = image; // Update the main image on thumbnail click
+			this.selectedFeatureImage = this.imageSrc(image); // Update the main image on thumbnail click
 		},
 
 		async submitReview() {
@@ -292,7 +293,9 @@ export default {
 			}
 			// Append removed images
 			if (this.productDetails.removedImages && this.productDetails.removedImages.length > 0) {
-				formData.append("removedImages", JSON.stringify(this.productDetails.removedImages));
+				this.productDetails.removedImages.forEach((image) => {
+					formData.append("removedImages", image);
+				})			
 			}
 
 			try {
@@ -384,6 +387,9 @@ export default {
 		async addToCart() {
 			if (this.isEditorEnabled()) {
 				this.submitProduct();
+				return;
+			}
+			if (this.isAdmin()) {
 				return;
 			}
 			try {
