@@ -4,4 +4,5 @@ export default class Env {
 	static API_BASE_URL = process.env.VUE_APP_API_BASE_URL;
 	static K_EMAIL = "email";
 	static K_CODE = "code";
+	static SERVER_URL = process.env.VUE_APP_SERVER_URL;
 }

@@ -4,40 +4,68 @@
 		<div class="card flex wrapper product-details">
 			<div class="main flex feature-image-wrapper">
 				<img :src="selectedFeatureImage" alt="Product Feature Image" class="feature-image" />
+
 				<div class="flex thumbnail-wrapper">
-					<img v-for="(image, index) in productDetails.imageSrcs" :key="index" :src="image"
-						:class="{ 'active-thumbnail': selectedFeatureImage === image }" @click="selectImage(image)"
-						class="thumbnail" alt="Thumbnail" />
+					<div class="thumbnail" v-for="(image, index) in productDetails.imageSrcs" :key="index"
+						:class="{ 'active-thumbnail': selectedFeatureImage === image }">
+						<img :src="imageSrc(image)" class="thumbnail" alt="Thumbnail"
+							@click="selectImage(image.url || image)" />
+
+						<button v-if="isEditorEnabled()" class="remove-thumbnail" @click="removeImage(index)">✕</button>
+					</div>
+					<div v-if="isEditorEnabled()" class="thumbnail add-thumbnail">
+						<button @click="triggerFileInput">+</button>
+						<input type="file" ref="fileInput" class="hidden-file-input" @change="addImage" />
+					</div>
 				</div>
 			</div>
 			<div class="sidebar flex product-info">
-				<h2 class="name">{{ productDetails.title }}</h2>
-				<p class="price">{{ formatCurrency(productDetails.price) }}</p>
-				<p class="description">{{ productDetails.description }}</p>
+				<h2 class="name">
+					<span v-if="!isEditorEnabled()">{{ productDetails.title }}</span>
+					<input v-else v-model="productDetails.title" type="text" placeholder="Product Title" />
+				</h2>
+				<p class="price">
+					<span v-if="!isEditorEnabled()">{{ formatCurrency(productDetails.price) }}</span>
+					<span v-else class="price-input-wrapper">
+						$ <input v-model="productDetails.price" type="number" min="0" placeholder="Price" />
+					</span>
+				</p>
 
-				<!-- Add to Cart Button -->
+				<p class="description">
+					<span v-if="!isEditorEnabled()">{{ productDetails.description }}</span>
+					<textarea v-else v-model="productDetails.description" placeholder="Product Description"
+						rows="3"></textarea>
+				</p>
+				<p class="stock">
+					<span v-if="!isEditorEnabled()">STOCK: {{ productDetails.stock }}</span>
+					<span v-else class="stock-input-wrapper">
+						Stock: <input v-model="productDetails.stock" type="number" min="0" placeholder="Stock" />
+					</span>
+				</p>
+
+				<ul class="error-messages" v-if="formErrors.length">
+					<li v-for="(error, index) in formErrors" :key="index" class="error-item">
+						{{ error }}
+					</li>
+				</ul>
+
 				<button class="primary-btn add-to-cart" @click="addToCart">
 					{{ addToCartButtonText }}
 				</button>
 
+				<button v-if="isAdmin() && !isEditingProduct && !isNewProduct" class="second-btn" @click="editProduct">
+					Edit Product
+				</button>
+				<button v-if="isAdmin() && isEditingProduct && !isNewProduct" class="second-btn" @click="deleteProduct">
+					Delete Product
+				</button>
+
 				<!-- Ratings and Reviews Section -->
-				<div class="rating">
+				<div v-if="!isEditorEnabled()" class="rating">
 					<p class="rating-score">
 						{{ productDetails.averageRating }}★ /
 						<span class="rating-length">{{ productDetails.reviews?.length || 0 }} ratings</span>
 					</p>
-					<!-- <div class="reviews">
-						<div v-for="(review, index) in productDetails.reviews" :key="index" class="user-review">
-							<div class="review-header">
-								<div class="review-rating">
-									<span v-for="star in 5" :key="star"
-										:class="{ 'filled': star <= review.rating, 'unfilled': star > review.rating }">★</span>
-								</div>
-								<strong class="review-user">{{ review.name }}</strong>
-							</div>
-							<p class="review-comment">{{ review.comment }}</p>
-						</div>
-					</div> -->
 					<div class="reviews">
 						<div v-for="(review, index) in productDetails.reviews" :key="index" class="user-review">
 							<div class="review-header">
@@ -83,6 +111,8 @@ export default {
 	},
 	data() {
 		return {
+			isNewProduct: false,
+			isEditingProduct: false,
 			productId: null,
 			productDetails: {},
 			selectedFeatureImage: "",
@@ -93,27 +123,52 @@ export default {
 				user: "Tim Nguyen",
 			},
 			canAddReview: false,
+			formErrors: [],
 		};
 	},
 	async created() {
-		this.productId = parseInt(this.$route.params.id, 10); // Ensure the productId is a number
-		await User.init();
-		await this.fetchProductDetails(this.productId); // Fetch product details
-		this.updateAddToCartText();
+		const productId = this.$route.params.productId;
+		const categoryId = this.$route.params.categoryId;
+		if (productId === "new") {
+			if (!categoryId) {
+				alert("Missing category Id");
+				this.$router.push(`/`);
+				return;
+			}
+			this.isNewProduct = true;
+			this.productDetails = {
+				title: "",
+				description: "",
+				price: 0,
+				imageSrcs: [],
+				categoryId: categoryId,
+				stock: 0,
+			};
+			this.selectedFeatureImage = require("@/assets/img/mock-feature-image.jpg");
+			this.addToCartButtonText = "Create Product";
+		} else {
+			this.isNewProduct = false;
+			this.productId = parseInt(productId, 10);
+			await User.init();
+			await this.fetchProductDetails(this.productId);
+			this.selectedFeatureImage = this.productDetails.imageSrcs?.[0] ? this.imageSrc(this.productDetails.imageSrcs[0]) : require("@/assets/img/mock-feature-image.jpg");
+			this.updateAddToCartText();
+		}
 	},
 	methods: {
+		isEditorEnabled() {
+			return this.isAdmin() && (this.isEditingProduct || this.isNewProduct)
+		},
+		isAdmin() {
+			return User.isLoggedInAdmin();
+		},
 		formatCurrency(value) {
 			return Lib.formatCurrency(value);
 		},
-		// async fetchProductDetails(id) {
-		//     try {
-		//         const response = await axios.get(`${Env.API_BASE_URL}/products/${id}`);
-		//         this.productDetails = response.data;
-		//         this.selectedFeatureImage = this.productDetails.imageSrcs[0]; // Set initial image
-		//     } catch (error) {
-		//         console.error("Error fetching product details:", error);
-		//     }
-		// },
+		editProduct() {
+			this.isEditingProduct = true;
+			this.addToCartButtonText = "Update Product";
+		},
 		async fetchProductDetails(id) {
 			try {
 				const response = await axios.get(`${Env.API_BASE_URL}/products/${id}`);
@@ -131,7 +186,7 @@ export default {
 				// Check if the current user has a placeholder review (0 stars)
 				const currentUserReview = ratingsResponse.data.find(
 					(rating) => rating.ratingStars === 0 && rating.user.email === User.getUserEmailCode().email
-				);				
+				);
 
 				if (currentUserReview) {
 					this.newReview = {
@@ -140,28 +195,32 @@ export default {
 						user: User.email,
 					};
 					this.canAddReview = true; // Allow user to add/update review
-					console.log("Updated Review Permission")					
+					console.log("Updated Review Permission")
 				}
 			} catch (error) {
 				console.error("Error fetching product details:", error);
 			}
+		},
+		triggerFileInput() {
+			this.$refs.fileInput.click(); // Trigger the hidden file input
+		},
+		imageSrc(image) {
+			if (typeof image === "string") {
+				if (image.startsWith("http")) {
+					return image;
+				}
+				// Existing image from the server
+				return Env.SERVER_URL + "/" + image;
+			} else if (image.url) {
+				// Newly added image with a temporary URL
+				return image.url;
+			}
+			return ""; // Fallback if no image
 		}
 		,
-
 		selectImage(image) {
 			this.selectedFeatureImage = image; // Update the main image on thumbnail click
 		},
-		// submitReview() {
-		// 	if (this.newReview.comment.trim() && this.newReview.rating > 0) {
-		// 		this.productDetails.reviews.push({
-		// 			name: this.newReview.user,
-		// 			rating: this.newReview.rating,
-		// 			comment: this.newReview.comment.trim(),
-		// 		});
-		// 		this.newReview.comment = "";
-		// 		this.newReview.rating = 0;
-		// 	}
-		// },
 
 		async submitReview() {
 			if (this.newReview.rating > 0 && this.newReview.comment.trim()) {
@@ -169,7 +228,7 @@ export default {
 					await axios.put(`${Env.API_BASE_URL}/ratings/${this.productId}`, {
 						ratingStars: this.newReview.rating,
 						ratingDescription: this.newReview.comment,
-						... User.getUserEmailCode()
+						...User.getUserEmailCode()
 					});
 					// alert("Your review has been submitted!");
 					await this.fetchProductDetails(this.productId); // Refresh product details
@@ -181,7 +240,152 @@ export default {
 				alert("Please provide a rating and a comment.");
 			}
 		},
+
+		validateForm() {
+			this.formErrors = []; // Reset errors
+
+			if (!this.productDetails.title || this.productDetails.title.trim() === "") {
+				this.formErrors.push("Product title cannot be empty.");
+			}
+			if (!this.productDetails.price || isNaN(this.productDetails.price)) {
+				this.formErrors.push("Product price cannot be empty and must be a valid number.");
+			}
+			if (!this.productDetails.description || this.productDetails.description.trim() === "") {
+				this.formErrors.push("Product description cannot be empty.");
+			}
+
+			// if (this.productDetails.stock == "" || isNaN(this.productDetails.stock)) {
+			// 	this.formErrors.push("Product ");
+			// }
+			if (!this.productDetails.imageSrcs || this.productDetails.imageSrcs.length === 0) {
+				this.formErrors.push("Please upload at least one feature image.");
+			}
+
+			return this.formErrors.length === 0; // Return true if no errors
+		},
+		async submitProduct() {
+			if (!this.validateForm()) {
+				return;
+			}
+
+			const formData = new FormData();
+			formData.append("title", this.productDetails.title);
+			formData.append("description", this.productDetails.description);
+			formData.append("price", this.productDetails.price);
+			formData.append("categoryId", this.productDetails.category?.id || this.$route.params.categoryId);
+			formData.append("stock", this.productDetails.stock || 0);
+
+			// Append selected images
+			if (this.productDetails.imageSrcs && this.productDetails.imageSrcs.length > 0) {
+				this.productDetails.imageSrcs.forEach((image) => {
+					// Handle files only, skip URLs
+					if (image.file) {
+						formData.append("images", image.file); // Use `image.file` if it's wrapped						
+						console.log("Appending image:", image.file.name);
+					}
+					else if (image instanceof File) {
+						formData.append(`images`, image);
+						console.log("Appending image:", image.name);
+					}
+
+				});
+			}
+			// Append removed images
+			if (this.productDetails.removedImages && this.productDetails.removedImages.length > 0) {
+				formData.append("removedImages", JSON.stringify(this.productDetails.removedImages));
+			}
+
+			try {
+				const { email, code } = User.getUserEmailCode();
+				const headers = {
+					"Content-Type": "multipart/form-data",
+					'X-User-Email': email,
+					'X-User-Code': code
+				}
+				if (this.isNewProduct) {
+					const response = await axios.post(`${Env.API_BASE_URL}/products`, formData, { headers });
+					alert("Product created successfully.");
+					// console.log(response.data);
+					this.isNewProduct = false;
+					this.$router.push(`/category/${this.$route.params.categoryId}/product/${response.data.productId}`);
+				} else {
+					// Update existing product
+					this.isEditingProduct = false;
+					await axios.put(`${Env.API_BASE_URL}/products/${this.productId}`, formData, { headers });
+					alert("Product updated successfully.");
+				}
+			} catch (error) {
+				console.error("Error saving product:", error);
+				alert("Failed to save product.");
+
+			}
+		},
+		async deleteProduct() {
+			const confirmation = prompt(`Type "DELETE" to delete this product":`);
+			if (confirmation !== 'DELETE') {
+				return;
+			}
+			const { email, code } = User.getUserEmailCode();
+			const headers = {
+				'X-User-Email': email,
+				'X-User-Code': code
+			}
+			try {
+				await axios.delete(`${Env.API_BASE_URL}/products/${this.productId}`, { headers });
+				alert("Product deleted successfully.");
+				this.$router.push("/");
+			} catch (error) {
+				console.error("Error deleting product:", error);
+			}
+		},
+		addImage(event) {
+			const file = event.target.files[0];
+			if (file) {
+				console.log("Selected file:", file);
+
+				const validTypes = ["image/jpeg", "image/png", "image/gif"];
+				if (!validTypes.includes(file.type)) {
+					alert("Invalid file type. Only JPG, PNG, and GIF are allowed.");
+					return;
+				}
+				if (file.size > 5 * 1024 * 1024) { // 5 MB size limit
+					alert("File size exceeds the 5MB limit.");
+					return;
+				}
+
+				// Generate a URL for the file to display in the UI
+				const fileUrl = URL.createObjectURL(file);
+
+				// Push both the file and the URL to manage preview and uploading
+				this.productDetails.imageSrcs.push({ file, url: fileUrl });
+
+				// Update the selected feature image to the newly added image
+				this.selectedFeatureImage = fileUrl;
+
+				// Clear the file input to allow re-adding the same file if needed
+				this.$refs.fileInput.value = "";
+			}
+		},
+
+		removeImage(index) {
+			const removedImage = this.productDetails.imageSrcs.splice(index, 1)[0];
+			if (typeof removedImage === "string") {
+				// Keep track of images that need to be removed on the backend
+				this.productDetails.removedImages = this.productDetails.removedImages || [];
+				this.productDetails.removedImages.push(removedImage);
+			}
+
+			// If the current selected image is removed, reset it
+			if (this.selectedFeatureImage === removedImage) {
+				this.selectedFeatureImage = this.productDetails.imageSrcs[0] ? this.imageSrc(this.productDetails.imageSrcs[0]) : require("@/assets/img/mock-feature-image.jpg");
+			}
+		},
+
 		async addToCart() {
+			if (this.isEditorEnabled()) {
+				this.submitProduct();
+				return;
+			}
 			try {
 				await User.addToCart(this.productId, this.$router); // Add product to the cart
 			} catch (error) {
@@ -190,9 +394,14 @@ export default {
 			this.updateAddToCartText(); // Update button text after adding to cart
 		},
 		updateAddToCartText() {
+			if (this.isNewProduct) {
+				return 'Create New Product';
+			}
 			// Dynamically update the button text based on cart state
 			this.addToCartButtonText = User.getAddToCartText(this.productId);
 		},
+
+
 	},
 };
 </script>
@@ -215,12 +424,12 @@ export default {
 			gap: 1em;
 
 			.thumbnail {
-				width: 50px;
-				height: 50px;
 				// padding: 0.3em;
 				border: 2px solid var(--border-color);
-				border-radius: 4px;
+				border-radius: 6px;
+				position: relative;
 				cursor: pointer;
+				padding: 1px;
 
 				&:hover {
 					border-color: var(--light-text-color);
@@ -233,6 +442,45 @@ export default {
 						border-color: var(--primary-color);
 					}
 				}
+
+				img,
+				button {
+					background: none;
+					font-size: 2em;
+					font-weight: 100;
+					padding: 0;
+					display: block;
+					border-radius: 4px;
+					width: 50px;
+					height: 50px;
+					object-fit: cover;
+					border: none;
+				}
+
+				input {
+					display: none;
+				}
+
+				button.remove-thumbnail {
+					position: absolute;
+					top: -1em;
+					right: -1em;
+					background-color: var(--white-bg-color);
+					color: var(--primary-color);
+					border: 1px solid var(--primary-color);
+					font-size: 0.5em;
+					height: 1em;
+					width: 1em;
+					padding: 0.5em;
+					box-sizing: content-box;
+					border-radius: 100%;
+
+					&:hover {
+						background-color: var(--primary-color);
+						color: var(--white-bg-color);
+					}
+				}
+
 			}
 
 		}
@@ -258,8 +506,13 @@ export default {
 		}
 
 		.description {
-			color: #666;
+			// color: var(--light-text-color);
 			font-size: 1em;
+			margin: 0;
+		}
+
+		.stock {
+			color: var(--light-text-color);
 			margin: 0;
 		}
 
@@ -283,7 +536,7 @@ export default {
 
 		.review-rating {
 			display: flex;
-			margin-right: 8px;						
+			margin-right: 8px;
 			color: var(--primary-color);
 			font-weight: var(--font-weight-button);
 
@@ -375,5 +628,44 @@ export default {
 			}
 		}
 	}
+
+	/// editor	
+	input,
+	textarea {
+		border: none;
+		font-weight: inherit;
+		font-size: inherit;
+		color: inherit;
+		border-bottom: 1px solid var(--light-text-color);
+		border-radius: 0;
+		padding: 0;
+		width: 100%;
+	}
+
+	.price-input-wrapper,
+	.stock-input-wrapper {
+		font-weight: inherit;
+		font-size: inherit;
+		color: inherit;
+		width: 100%;
+		display: flex;
+		gap: 0.2em;
+		border-bottom: 1px solid var(--light-text-color);
+
+		input {
+			border: none;
+		}
+	}
+
+	.error-messages {
+		padding: 0;
+		color: var(--primary-color);
+
+		li {
+			display: block;
+			margin-bottom: 1em;
+		}
+	}
+
 }
 </style>

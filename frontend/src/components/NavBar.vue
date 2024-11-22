@@ -10,7 +10,9 @@
 					<button @click="editCategory(category)" class="edit" title="Edit">Edit</button>
 					<button @click="confirmDeleteCategory(category)" class="delete" title="Delete">Del</button>
 				</div>
-				<router-link :to="`/category/${category.categoryId}`">{{ category.name }}</router-link>
+				<router-link :to="`/category/${category.categoryId}`"
+					:class="category.categoryId == this.$route.params.categoryId ? 'active-link' : ''"
+				>{{ category.name }}</router-link>
 			</li>
 			<li v-if="isAdmin" class="add-new-category">
 				<button @click="addCategory">+ New</button>
@@ -111,21 +113,23 @@ export default {
 		},
 		async confirmDeleteCategory(category) {
 			const confirmation = prompt(`Type "DELETE" to confirm deletion of "${category.name}":`);
-			if (confirmation === 'DELETE') {
-				try {
-					const { email, code } = User.getUserEmailCode(); // Retrieve email and code
-
-					await axios.delete(`${Env.API_BASE_URL}/categories/${category.categoryId}`, {
-						headers: {
-							'X-User-Email': email,
-							'X-User-Code': code
-						}
-					});
-					this.fetchCategories();
-				} catch (error) {
-					alert('Failed to delete category. Ensure you have admin rights.');
-				}
+			if (confirmation !== 'DELETE') {
+				return
 			}
+			try {
+				const { email, code } = User.getUserEmailCode();
+
+				await axios.delete(`${Env.API_BASE_URL}/categories/${category.categoryId}`, {
+					headers: {
+						'X-User-Email': email,
+						'X-User-Code': code
+					}
+				});
+				this.fetchCategories();
+			} catch (error) {
+				alert('Failed to delete category. Ensure you have admin rights.');
+			}
+
 		},
 	},
 };
@@ -220,7 +224,7 @@ export default {
 		}
 	}
 
-	.router-link-exact-active {
+	.active-link {
 		border-bottom: 2px solid var(--primary-color);
 	}
 }

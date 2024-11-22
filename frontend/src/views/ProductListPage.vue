@@ -7,9 +7,9 @@
 			<div class="product-list main">
 				<div v-for="product in products" :key="product.productId" class="product-item">
 					<!-- This router-link navigates to the detail page -->
-					<router-link :to="{ name: 'product-detail', params: { id: product.productId } }"
+					<router-link :to="{ name: 'product-detail', params: { categoryId: product.category.categoryId, productId: product.productId } }"
 						class="product-info">
-						<img :src="product.imageSrcs[0]" :alt="product.title" class="image" />
+						<img :src="imageSrc(product.imageSrcs[0])" :alt="product.title" class="image" />
 						<p class="meta">
 							<span class="price ">{{ formatCurrency(product.price) }}</span>
 							<span class="rating">{{ product.averageRating }}★</span>
@@ -128,9 +128,9 @@ export default {
 		};
 	},
 	watch: {
-		"$route.params.id": "fetchProducts", // Watch for category changes
+		"$route.params.categoryId": "fetchProducts", // Watch for category changes
 	},
-	computed: {	
+	computed: {
 	},
 	async created() {
 		this.debounceFilterChange = debounce(this.fetchProducts, 500); // Delay product fetching on filter change
@@ -139,14 +139,30 @@ export default {
 	},
 	methods: {
 		isAdmin() {
-			if (!this.$route.params.id) {
+			if (!this.$route.params.categoryId) {
 				return false;
 			}
-			console.log(this.$route.params.id)
+			console.log(this.$route.params.categoryId)
 			return User.isLoggedInAdmin();
 		},
 		addNewProduct() {
-			this.$router.push("/product/0")
+			if (!this.$route.params.categoryId || isNaN(this.$route.params.categoryId)) {
+				return
+			}
+			this.$router.push("/category/" + this.$route.params.categoryId + "/product/new")
+		},
+		imageSrc(image) {
+			if (typeof image === "string") {
+				if (image.startsWith("http")) {
+					return image;
+				}
+				// Existing image from the server
+				return Env.SERVER_URL + "/" + image;
+			} else if (image.url) {
+				// Newly added image with a temporary URL
+				return image.url;
+			}
+			return ""; // Fallback if no image
 		},
 		formatCurrency(value) {
 			return Lib.formatCurrency(value);
@@ -173,7 +189,7 @@ export default {
 					minRating: this.filters.minRating || null,
 					maxRating: this.filters.maxRating || null,
 					inStock: this.filters.stock === "all" ? null : this.filters.stock === "in",
-					categoryId: this.$route.params.id || null, // Category filter
+					categoryId: this.$route.params.categoryId || null, // Category filter
 				};
 
 				// Fetch data from the backend
@@ -347,10 +363,11 @@ export default {
 
 
 		}
-		
+
 	}
+
 	.add-new-product {
-		border-style: dashed;		
+		border-style: dashed;
 		border-width: 2px;
 		width: 100%;
 		padding: 50px 0;
