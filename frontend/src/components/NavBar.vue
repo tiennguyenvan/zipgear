@@ -224,7 +224,7 @@ export default {
 		}
 	}
 
-	.active-link {
+	.active-link, .router-link-exact-active {
 		border-bottom: 2px solid var(--primary-color);
 	}
 }

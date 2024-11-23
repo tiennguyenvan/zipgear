@@ -12,13 +12,15 @@
 						<img :src="imageSrc(product.imageSrcs[0])" :alt="product.title" class="image" />
 						<p class="meta">
 							<span class="price ">{{ formatCurrency(product.price) }}</span>
-							<span class="rating">{{ product.averageRating }}★</span>
+							<span v-if="product.averageRating" class="rating">{{ product.averageRating }}★</span>
 						</p>
 						<h3 class="name">{{ product.title }}</h3>
 					</router-link>
-					<button class="action add-to-cart" @click="addToCart(product.productId)">
+					<button v-if="product.stock > 0" class="action add-to-cart" @click="addToCart(product.productId)">
 						{{ product.addToCartText || getAddToCartText(product.productId) }}
+						
 					</button>
+					<span v-else class="dim-text">Out of stock</span>
 				</div>
 			</div>
 

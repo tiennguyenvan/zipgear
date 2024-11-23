@@ -53,127 +53,146 @@ public class DemoApplication {
 			User adminUser = new User();
 			adminUser.setEmail(Env.ADMIN_EMAIL);
 			userRepository.save(adminUser);
-			User mockUser = new User();
-			mockUser.setEmail("a@a");
-			mockUser.setAddresses(Arrays.asList("123 Mock St, Mock City, BC"));
+
+			User mockUser1 = new User();
+			mockUser1.setEmail("chau20nm@gmail.com");			
+			User mockUser2 = new User();
+			mockUser2.setEmail("eddiechae93@gmail.com");
+			User mockUser3 = new User();
+			mockUser3.setEmail("tmhoang2906@gmail.com");
+			mockUser3.setAddresses(Arrays.asList("700 Royal Ave, New Westminster, BC"));
 
 			// Save the user to the repository
-			userRepository.save(mockUser);
+			userRepository.save(mockUser3);
 
-			// System.out.println("Mock user created: " + mockUser.getEmail());
-			// Create categories and products directly, using addProduct to set
-			// relationships
+			
 
 			// Category: Laptop
 			Category laptopCategory = new Category();
 			laptopCategory.setName("Laptop");
 
-			Product laptop1 = new Product();
-			laptop1.setTitle("Laptop 1");
-			laptop1.setDescription("Description for Laptop 1");
-			laptop1.setPrice(new BigDecimal("799.99"));
-			laptop1.setImageSrcs(List.of("https://picsum.photos/200?random=1", "https://picsum.photos/200?random=2"));
-			laptop1.setStock(10);
-			laptop1.setAverageRating(4.5);
+			// create products
+			Product macbookPro = new Product();
+			Product dellXps = new Product();
+			Product msSurface = new Product();
+			Product iphone16 = new Product();
+			Product samsungGalaxy = new Product();
+			Product googlePixel = new Product();			
+			Product sonyHeadphone = new Product();
+			Product AirPodsPro = new Product();
+			Product AirPodsMax = new Product();
+			
+			
 
-			Product laptop2 = new Product();
-			laptop2.setTitle("Laptop 2");
-			laptop2.setDescription("Description for Laptop 2");
-			laptop2.setPrice(new BigDecimal("899.99"));
-			laptop2.setImageSrcs(List.of("https://picsum.photos/200?random=3", "https://picsum.photos/200?random=4"));
-			laptop2.setStock(15);
-			laptop2.setAverageRating(4.0);
+			// provide product details			
+			macbookPro.setTitle("MacBook Pro M4");
+			macbookPro.setDescription("The MacBook Pro M4 offers a balance of performance and portability. Equipped with Apple's M4 chip, it delivers impressive speed and efficiency. The 14.3-inch Liquid Retina display provides vibrant visuals, and its lightweight design makes it ideal for on-the-go use. With a battery life exceeding 25 hours, it's suitable for both professionals and students.");
+			macbookPro.setPrice(new BigDecimal("4399"));
+			macbookPro.setImageSrcs(List.of("uploads/zipgear-demo-image-macbook-m4-pro-01.png", "uploads/zipgear-demo-image-macbook-m4-pro-02.png"));
+			macbookPro.setStock(10);
+			macbookPro.setAverageRating(5.0);
+			macbookPro.addRating(mockUser3, 5, "Excellent headphone, very rich and reliable.");
 
-			Product laptop3 = new Product();
-			laptop3.setTitle("Laptop 3");
-			laptop3.setDescription("Description for Laptop 3");
-			laptop3.setPrice(new BigDecimal("999.99"));
-			laptop3.setImageSrcs(List.of("https://picsum.photos/200?random=5", "https://picsum.photos/200?random=6"));
-			laptop3.setStock(5);
-			laptop3.setAverageRating(4.8);
+			
+			dellXps.setTitle("Dell XPS 13");
+			dellXps.setDescription("The Dell XPS 13 is renowned for its sleek design and robust performance. The 2024 model features the Snapdragon X Elite chip, offering enhanced speed and efficiency. Its InfinityEdge display provides an immersive viewing experience, and the compact form factor ensures portability. This laptop is a strong contender for users seeking a premium Windows experience.");
+			dellXps.setPrice(new BigDecimal("1299"));
+			dellXps.setImageSrcs(List.of("uploads/zipgear-demo-image-dell-xps-13-01.png", "uploads/zipgear-demo-image-dell-xps-13-02.png"));
+			dellXps.setStock(15);
+			// laptop2.setAverageRating(4.0);
 
-			// Add products to the category
-			laptopCategory.addProduct(laptop1);
-			laptopCategory.addProduct(laptop2);
-			laptopCategory.addProduct(laptop3);
+			
+			msSurface.setTitle("MS Surface Laptop");
+			msSurface.setDescription("Microsoft's Surface Laptop combines elegant design with powerful performance. The 2024 edition, powered by the Qualcomm Snapdragon X Elite chip, offers a seamless Windows 11 experience. Available in 14-inch and 15-inch models, it boasts a high-resolution display and impressive battery life, making it suitable for both work and entertainment. ");
+			msSurface.setPrice(new BigDecimal("1399"));
+			msSurface.setImageSrcs(List.of("uploads/zipgear-demo-image-ms-surface-01.png", "uploads/zipgear-demo-image-ms-surface-02.png"));
+			msSurface.setStock(5);
+			// laptop3.setAverageRating(4.8);
+
+			
 
 			// Category: Mobile
 			Category mobileCategory = new Category();
 			mobileCategory.setName("Mobile");
+			
+			iphone16.setTitle("iPhone 16 Pro");
+			iphone16.setDescription("Apple's flagship device features a 6.9-inch Super Retina XDR OLED display, the A18 Pro chipset, and a versatile triple-camera system. It introduces the Camera Control button and integrates Apple Intelligence for enhanced AI capabilities.");
+			iphone16.setPrice(new BigDecimal("1199"));
+			iphone16.setImageSrcs(List.of("uploads/zipgear-demo-image-iphone-16-pro-01.png", "uploads/zipgear-demo-image-iphone-16-pro-02.png"));
+			iphone16.setStock(25);
+			// mobile1.setAverageRating(4.3);
+			
+			samsungGalaxy.setTitle("Samsung Galaxy S24");
+			samsungGalaxy.setDescription("Samsung's premium offering boasts a 6.8-inch Dynamic AMOLED 2X display, the Exynos 2400 or Snapdragon 8 Gen 3 processor (depending on the region), and a quad-camera setup with a 200MP main sensor. It features a titanium frame and offers up to seven years of OS updates.");
+			samsungGalaxy.setPrice(new BigDecimal("1299.99"));
+			samsungGalaxy.setImageSrcs(List.of("uploads/zipgear-demo-image-samsung-galaxy-s24-01.png", "uploads/zipgear-demo-image-samsung-galaxy-s24-02.png"));
+			samsungGalaxy.setStock(30);
+			// mobile2.setAverageRating(4.7);
 
-			Product mobile1 = new Product();
-			mobile1.setTitle("Mobile 1");
-			mobile1.setDescription("Description for Mobile 1");
-			mobile1.setPrice(new BigDecimal("499.99"));
-			mobile1.setImageSrcs(List.of("https://picsum.photos/200?random=7", "https://picsum.photos/200?random=8"));
-			mobile1.setStock(25);
-			mobile1.setAverageRating(4.3);
+			
+			googlePixel.setTitle("Google Pixel 9");
+			googlePixel.setDescription("Google's latest flagship comes with a 6.8-inch Super Actua LTPO display, the Tensor G4 chipset, and a triple-camera system optimized for AI-enhanced photography. It offers seven years of OS and security updates");
+			googlePixel.setPrice(new BigDecimal("1099"));
+			googlePixel.setImageSrcs(List.of("uploads/zipgear-demo-image-google-pixel-9-01.png", "uploads/zipgear-demo-image-google-pixel-9-02.png"));
+			googlePixel.setStock(20);
+			// mobile3.setAverageRating(4.6);
 
-			Product mobile2 = new Product();
-			mobile2.setTitle("Mobile 2");
-			mobile2.setDescription("Description for Mobile 2");
-			mobile2.setPrice(new BigDecimal("599.99"));
-			mobile2.setImageSrcs(List.of("https://picsum.photos/200?random=9", "https://picsum.photos/200?random=10"));
-			mobile2.setStock(30);
-			mobile2.setAverageRating(4.7);
-
-			Product mobile3 = new Product();
-			mobile3.setTitle("Mobile 3");
-			mobile3.setDescription("Description for Mobile 3");
-			mobile3.setPrice(new BigDecimal("699.99"));
-			mobile3.setImageSrcs(List.of("https://picsum.photos/200?random=11", "https://picsum.photos/200?random=12"));
-			mobile3.setStock(20);
-			mobile3.setAverageRating(4.6);
-
-			// Add products to the category
-			mobileCategory.addProduct(mobile1);
-			mobileCategory.addProduct(mobile2);
-			mobileCategory.addProduct(mobile3);
-
+			
 			// Category: Headphone
 			Category headphoneCategory = new Category();
 			headphoneCategory.setName("Headphone");
 
-			Product headphone1 = new Product();
-			headphone1.setTitle("Headphone 1");
-			headphone1.setDescription("Description for Headphone 1");
-			headphone1.setPrice(new BigDecimal("99.99"));
-			headphone1.setImageSrcs(
-					List.of("https://picsum.photos/200?random=13", "https://picsum.photos/200?random=14"));
-			headphone1.setStock(50);
-			headphone1.setAverageRating(4.2);
+			
+			sonyHeadphone.setTitle("Sony WH-1000XM5");
+			sonyHeadphone.setDescription("These over-ear headphones are renowned for their exceptional sound quality and industry-leading noise cancellation. They offer up to 30 hours of battery life and feature intuitive touch controls. Priced at approximately");
+			sonyHeadphone.setPrice(new BigDecimal("400"));
+			sonyHeadphone.setImageSrcs(
+					List.of("uploads/zipgear-demo-image-sony-wh-1000xm5-01.png", "uploads/zipgear-demo-image-sony-wh-1000xm5-02.png"));
+			sonyHeadphone.setStock(50);
+			// headphone1.setAverageRating(4.2);
 
-			Product headphone2 = new Product();
-			headphone2.setTitle("Headphone 2");
-			headphone2.setDescription("Description for Headphone 2");
-			headphone2.setPrice(new BigDecimal("149.99"));
-			headphone2.setImageSrcs(
-					List.of("https://picsum.photos/200?random=15", "https://picsum.photos/200?random=16"));
-			headphone2.setStock(40);
-			headphone2.setAverageRating(4.4);
+			
+			AirPodsPro.setTitle("Apple AirPods Pro");
+			AirPodsPro.setDescription("These in-ear earphones provide excellent sound quality, active noise cancellation, and seamless integration with Apple devices. They come with a MagSafe charging case and offer up to 6 hours of listening time on a single charge");
+			AirPodsPro.setPrice(new BigDecimal("249.99"));
+			AirPodsPro.setImageSrcs(
+				List.of("uploads/zipgear-demo-image-apple-airpods-pro-01.png", "uploads/zipgear-demo-image-apple-airpods-pro-02.png"));
+			AirPodsPro.setStock(40);
+			// headphone2.setAverageRating(4.4);
 
-			Product headphone3 = new Product();
-			headphone3.setTitle("Headphone 3");
-			headphone3.setDescription("Description for Headphone 3");
-			headphone3.setPrice(new BigDecimal("199.99"));
-			headphone3.setImageSrcs(
-					List.of("https://picsum.photos/200?random=17", "https://picsum.photos/200?random=18"));
-			headphone3.setStock(35);
-			headphone3.setAverageRating(4.1);
-			headphone3.addRating(mockUser, 5, "Excellent headphone, very rich and reliable.");
+			
+			AirPodsMax.setTitle("Apple AirPods Max");
+			AirPodsMax.setDescription("The Apple AirPods Max are premium over-ear headphones known for their high-fidelity audio, active noise cancellation, and seamless integration with Apple devices. They feature a custom acoustic design, including a 40mm dynamic driver for rich sound across various frequencies. The headphones offer up to 20 hours of listening time with active noise cancellation or transparency mode enabled");
+			AirPodsMax.setPrice(new BigDecimal("549"));
+			AirPodsMax.setImageSrcs(
+					List.of("uploads/zipgear-demo-image-apple-airpods-max-01.png", "uploads/zipgear-demo-image-apple-airpods-max-02.png"));
+			AirPodsMax.setStock(35);
+			// headphone3.setAverageRating(5.0);
+			
 
 			// Add products to the category
-			headphoneCategory.addProduct(headphone1);
-			headphoneCategory.addProduct(headphone2);
-			headphoneCategory.addProduct(headphone3);
-
-			// Save each category individually
-			categoryRepository.save(laptopCategory);
-			categoryRepository.save(mobileCategory);
+			laptopCategory.addProduct(macbookPro);
+			categoryRepository.save(laptopCategory);										
+			headphoneCategory.addProduct(AirPodsMax);
+			headphoneCategory.addProduct(AirPodsPro);
 			categoryRepository.save(headphoneCategory);
+			mobileCategory.addProduct(iphone16);
+			mobileCategory.addProduct(samsungGalaxy);
+			mobileCategory.addProduct(googlePixel);			
+			categoryRepository.save(mobileCategory);
+			headphoneCategory.addProduct(sonyHeadphone);						
+			categoryRepository.save(headphoneCategory);
+			laptopCategory.addProduct(dellXps);
+			laptopCategory.addProduct(msSurface);		
+			categoryRepository.save(laptopCategory);
+			
+			// Save each category individually
+			// categoryRepository.save(laptopCategory);
+			// categoryRepository.save(mobileCategory);
+			// categoryRepository.save(headphoneCategory);
 
-			Cart cart = new Cart(mockUser);
-			CartItem cartItem1 = new CartItem(cart, laptop1, 2); // Adding 2 units of Laptop 1
+			Cart cart = new Cart(mockUser3);
+			CartItem cartItem1 = new CartItem(cart, macbookPro, 2); // Adding 2 units of Laptop 1
 			cart.getItems().add(cartItem1);
 			cartRepository.save(cart);
 
@@ -188,17 +207,17 @@ public class DemoApplication {
 			// Mock Country", totalPrice1);
 
 			Order order1 = new Order();
-			order1.setUser(mockUser);
+			order1.setUser(mockUser3);
 			order1.setProductList(cart.getItems());
-			order1.setDeliveryAddress("123 Mock St, Mock City, Mock Country");
+			order1.setDeliveryAddress(mockUser3.getAddresses().get(0));
 			order1.setTotalPrice(totalPrice1);
 
-			order1.setOrderStatus(OrderStatus.PROCESSING);
+			order1.setOrderStatus(OrderStatus.DELIVERED);
 			orderRepository.save(order1);
 
 			// Second Cart with other products
 			cart.getItems().clear();
-			CartItem cartItem2 = new CartItem(cart, mobile1, 1); // Adding 1 unit of Mobile 1
+			CartItem cartItem2 = new CartItem(cart, iphone16, 1); // Adding 1 unit of Mobile 1
 			cart.getItems().add(cartItem2);
 			// Save the second cart with items
 			cartRepository.save(cart);

@@ -49,9 +49,10 @@
 					</li>
 				</ul>
 
-				<button v-if="!isAdmin() || isEditorEnabled()" class="primary-btn add-to-cart" @click="addToCart">
+				<button v-if="productDetails.stock > 0 && (!isAdmin() || isEditorEnabled())" class="primary-btn add-to-cart" @click="addToCart">
 					{{ addToCartButtonText }}
 				</button>
+				<button v-else disabled>Out of stock</button>
 
 				<button v-if="isAdmin() && !isEditingProduct && !isNewProduct" class="second-btn" @click="editProduct">
 					Edit Product
@@ -515,6 +516,7 @@ export default {
 			// color: var(--light-text-color);
 			font-size: 1em;
 			margin: 0;
+			line-height: 1.6em;
 		}
 
 		.stock {

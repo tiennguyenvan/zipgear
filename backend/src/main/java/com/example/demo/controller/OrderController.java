@@ -111,6 +111,13 @@ public class OrderController {
 		BigDecimal totalPrice = BigDecimal.ZERO;
 
 		for (CartItem item : cart.getItems()) {
+			Product product = item.getProduct();
+			if (product.getStock() < item.getQuantity()) {
+				return Lib.RestBadRequest("Insufficient stock for product: " + product.getTitle());
+			}
+			product.setStock(product.getStock() - item.getQuantity());
+        	productRepository.save(product);
+
 			BigDecimal itemTotalPrice = item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
 			totalPrice = totalPrice.add(itemTotalPrice);
 
@@ -197,7 +204,6 @@ public class OrderController {
 
 			orderRepository.save(order);
 			return Lib.RestOk("Order status updated successfully.");
-
 		}
 
 		if (order.getOrderStatus() != OrderStatus.PROCESSING) {

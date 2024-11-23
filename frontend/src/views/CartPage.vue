@@ -16,9 +16,12 @@
 							<button class="quantity-btn" @click="updateCart(item.product.productId, -1)">
 								−
 							</button>
-							<input class="quantity-input" v-model.number="item.quantity"
-								@change="updateCart(item.product.productId, -item.quantity /*0 , item.quantity*/)"
-								min="0" disabled />
+							<span class="quantity-input">
+								<input v-model.number="item.quantity"
+									@change="updateCart(item.product.productId, -item.quantity /*0 , item.quantity*/)"
+									min="0" disabled />
+									{{ item.quantity }} / {{ item.product.stock }}
+							</span>
 							<button class="quantity-btn" @click="updateCart(item.product.productId, 1)">
 								+
 							</button>
@@ -175,7 +178,8 @@ export default {
 
 				this.cartItems = []; // Clear the cart
 				this.userAddress = ""; // Clear the address
-				this.$router.push("/profile")
+				// this.$router.push("/profile")		
+				window.location.href = "/profile";		
 			} catch (error) {
 				console.error("Failed to place order:", error);
 				alert("Failed to place the order. Please try again.");
@@ -221,6 +225,7 @@ export default {
 			align-items: center;
 			margin-right: 50px;
 			gap: 15px;
+			user-select: none;
 
 			.quantity-btn {
 				background: none;
@@ -232,19 +237,21 @@ export default {
 				user-select: none;
 			}
 
-			.quantity-input {
-				// width: 3em;				
-				text-align: center;
-				// border: 1px solid var(--border-color);
-				border-radius: 5px;
-				box-sizing: content-box;
-				// padding: 10px 0px 10px 10px;
+			.quantity-input {						
+				text-align: center;								
+				box-sizing: content-box;				
 				font-size: 1.2em;
 				font-weight: 600;
-				width: 2em;
-				padding: 0;
-				background: none;
-				border: none;
+				width: fit-content;						
+				input {
+					display: none;
+					width: fit-content;
+					padding: 0;
+					font-size: inherit;
+					font-weight: inherit;
+					background: none;
+					border: none;
+				}
 			}
 		}
 
