@@ -60,7 +60,7 @@
 
 				<button class="checkout-btn primary-btn" :disabled="cartItems.length === 0 || !userAddress.trim()"
 					@click="handleCheckout">
-					placeholder
+					Place Order
 				</button>
 
 			</div>
