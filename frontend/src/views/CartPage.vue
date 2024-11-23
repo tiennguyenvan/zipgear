@@ -7,7 +7,7 @@
 			<div class="cart main">
 				<div v-if="cartItems.length > 0">
 					<div v-for="(item, index) in cartItems" :key="index" class="cart-item flex">
-						<img :src="item.product.imageSrcs[0]" alt="Product Image" class="product-image" />
+						<img :src="imageSrc(item.product.imageSrcs[0])" alt="Product Image" class="product-image" />
 						<div class="product-info">
 							<h3>{{ item.product.title }}</h3>
 							<p>{{ formatCurrency(item.product.price) }}</p>
@@ -100,6 +100,19 @@ export default {
 		await this.loadUserData(); // Load the user's saved address
 	},
 	methods: {
+		imageSrc(image) {
+			if (typeof image === "string") {
+				if (image.startsWith("http")) {
+					return image;
+				}
+				// Existing image from the server
+				return Env.SERVER_URL + "/" + image;
+			} else if (image.url) {
+				// Newly added image with a temporary URL
+				return image.url;
+			}
+			return ""; // Fallback if no image
+		},
 		formatCurrency(value) {
 			return Lib.formatCurrency(value);
 		},
