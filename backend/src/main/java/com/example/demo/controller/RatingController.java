@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalDouble;
 
 @RestController
 @RequestMapping("/api")
@@ -76,6 +77,7 @@ public class RatingController {
 		if (ratingStars < 0 || ratingStars > 5) {
 			return Lib.RestBadRequest("Invalid rating stars");
 		}
+		System.out.println("ratingStars: " + ratingStars);
 		String ratingDescription = (String) request.get("ratingDescription");
 		Rating rating = new Rating(product, user, ratingStars, ratingDescription);
 		ratingRepository.save(rating);
@@ -84,7 +86,8 @@ public class RatingController {
 
 	// PUT: Update rating for a user
 	@PutMapping("/ratings/{productId}")
-	public ResponseEntity<?> updateRatingByProductId(@RequestBody Map<String, Object> request, @PathVariable Long productId) {
+	public ResponseEntity<?> updateRatingByProductId(@RequestBody Map<String, Object> request,
+			@PathVariable Long productId) {
 		Product product = productRepository.findById(productId).orElse(null);
 		if (product == null) {
 			return Lib.RestBadRequest("Invalid product ID: " + productId);
@@ -96,15 +99,21 @@ public class RatingController {
 
 		Integer ratingStars = (Integer) request.get("ratingStars");
 		String ratingDescription = (String) request.get("ratingDescription");
-		List<Rating> ratings = ratingRepository.findByUserAndProduct(user, product);
-		if (ratings.size() == 0) {
+		
+
+		List<Rating> ratingsFromUserProduct = ratingRepository.findByUserAndProduct(user, product);
+		if (ratingsFromUserProduct.size() == 0) {
 			return Lib.RestNotFound("Rating not found for product ID: " + productId);
 		}
+		System.out.println("ratingStars Updated: " + ratingStars);
 
-		Rating rating = ratings.get(0);
+		Rating rating = ratingsFromUserProduct.get(0);
 		rating.setRatingStars(ratingStars);
 		rating.setRatingDescription(ratingDescription);
 		ratingRepository.save(rating);
+
+		updateProductAveraeRating(product);
+
 		return Lib.RestOk("Rating updated successfully.");
 	}
 
@@ -125,7 +134,25 @@ public class RatingController {
 		if (ratings.size() == 0) {
 			return Lib.RestNotFound("Rating not found for product ID: " + productId);
 		}
-		ratingRepository.delete(ratings.get(0));
+		Rating rating = ratings.get(0);
+		rating.setRatingStars(0);
+		rating.setRatingDescription("");
+		ratingRepository.save(rating);
+		// ratingRepository.delete(ratings.get(0));
+		updateProductAveraeRating(product);
 		return Lib.RestOk("Rating deleted for product ID: " + productId);
+	}
+
+	private void updateProductAveraeRating(Product product) {
+		List<Rating> ratingsFromProduct = ratingRepository.findByProduct(product);
+		if (ratingsFromProduct.size() > 0) {
+			OptionalDouble averageRating = ratingsFromProduct.stream()
+					.mapToInt(Rating::getRatingStars) // Extract the rating stars
+					.average(); // Calculate the average
+
+			double average = averageRating.isPresent() ? averageRating.getAsDouble() : 0.0;
+			product.setAverageRating(average);
+			productRepository.save(product);
+		}
 	}
 }

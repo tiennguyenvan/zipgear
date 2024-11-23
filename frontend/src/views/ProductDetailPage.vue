@@ -49,7 +49,8 @@
 					</li>
 				</ul>
 
-				<button v-if="productDetails.stock > 0 && (!isAdmin() || isEditorEnabled())" class="primary-btn add-to-cart" @click="addToCart">
+				<button v-if="productDetails.stock > 0 && (!isAdmin() || isEditorEnabled())"
+					class="primary-btn add-to-cart" @click="addToCart">
 					{{ addToCartButtonText }}
 				</button>
 				<button v-else disabled>Out of stock</button>
@@ -72,9 +73,13 @@
 							<div class="review-header">
 								<div class="review-rating">
 									<span v-for="star in 5" :key="star"
-										:class="{ 'filled': star <= review.rating, 'unfilled': star > review.rating }">★</span>
+										:class="{ 'filled': star <= review.ratingStars, 'unfilled': star > review.ratingStars }">★</span>
 								</div>
-								<strong class="review-user">{{ review.user.email }}</strong>
+								<strong class="review-user">{{ userName(review.user.email) }}</strong>
+								<div v-if="isReviewOwner(review.user.email)" class="review-actions">
+									<!-- <button @click="editReview">Edit</button> -->
+									<button @click="deleteReview">Delete</button>
+								</div>
 							</div>
 							<p class="review-comment">{{ review.ratingDescription }}</p>
 						</div>
@@ -83,10 +88,12 @@
 
 					<!-- Add New Review Section -->
 					<div v-if="canAddReview" class="add-review">
-						<div class="star-rating">
-							<span v-for="star in 5" :key="star" @click="newReview.rating = star"
-								:class="{ 'selected': star <= newReview.rating }">★</span>
-							<h4 class="review-user-name">Tim Nguyen</h4>
+						<div class="review-header">
+							<div class="star-rating">
+								<span v-for="star in 5" :key="star" @click="newReview.rating = star"
+									:class="{ 'selected': star <= newReview.rating }">★</span>
+							</div>
+							<strong class="review-user-name">{{ userName() }}</strong>
 						</div>
 						<textarea class="review-content-input" v-model="newReview.comment"
 							placeholder="Your review here..." required></textarea>
@@ -183,7 +190,7 @@ export default {
 					...response.data,
 					reviews: filteredReviews, // Display only non-placeholder reviews
 				};
-				this.selectedFeatureImage = this.productDetails.imageSrcs[0]; // Set initial image
+				this.selectedFeatureImage = this.imageSrc(this.productDetails.imageSrcs[0]); // Set initial image
 
 				// Check if the current user has a placeholder review (0 stars)
 				const currentUserReview = ratingsResponse.data.find(
@@ -198,6 +205,9 @@ export default {
 					};
 					this.canAddReview = true; // Allow user to add/update review
 					console.log("Updated Review Permission")
+				} else {
+					this.canAddReview = false;
+
 				}
 			} catch (error) {
 				console.error("Error fetching product details:", error);
@@ -223,7 +233,16 @@ export default {
 		selectImage(image) {
 			this.selectedFeatureImage = this.imageSrc(image); // Update the main image on thumbnail click
 		},
-
+		isReviewOwner(email) {
+			return email == User.getUserEmailCode().email
+		},
+		userName(email) {
+			if (email == null) {
+				email = User.getUserEmailCode().email;
+			}
+			return (email.split('@')[0]).split('').map((c, i) => i == 0 ? c.toUpperCase() : c).join('');
+		},
+		
 		async submitReview() {
 			if (this.newReview.rating > 0 && this.newReview.comment.trim()) {
 				try {
@@ -240,6 +259,34 @@ export default {
 				}
 			} else {
 				alert("Please provide a rating and a comment.");
+			}
+		},
+		async editReview() {
+			if (this.newReview.comment.trim() && this.newReview.rating > 0) {
+				try {
+					await axios.put(`${Env.API_BASE_URL}/ratings/${this.productId}`, {
+						ratingStars: this.newReview.rating,
+						ratingDescription: this.newReview.comment,
+						...User.getUserEmailCode(),
+					});
+					alert("Your review has been updated.");
+					await this.fetchProductDetails(this.productId); // Refresh product details
+				} catch (error) {
+					console.error("Error updating review:", error);
+				}
+			} else {
+				alert("Please provide a valid rating and comment.");
+			}
+		},
+		async deleteReview() {
+			try {
+				await axios.delete(`${Env.API_BASE_URL}/ratings/${this.productId}`, {
+					data: User.getUserEmailCode(),
+				});
+				alert("Your review has been deleted.");
+				await this.fetchProductDetails(this.productId); // Refresh product details
+			} catch (error) {
+				console.error("Error deleting review:", error);
 			}
 		},
 
@@ -296,7 +343,7 @@ export default {
 			if (this.productDetails.removedImages && this.productDetails.removedImages.length > 0) {
 				this.productDetails.removedImages.forEach((image) => {
 					formData.append("removedImages", image);
-				})			
+				})
 			}
 
 			try {
@@ -538,13 +585,14 @@ export default {
 
 		.review-header {
 			display: flex;
+			gap: 0.5em;
 			align-items: center;
 			margin-bottom: var(--spacing-element-small);
 		}
 
 		.review-rating {
 			display: flex;
-			margin-right: 8px;
+			// margin-right: 8px;
 			color: var(--primary-color);
 			font-weight: var(--font-weight-button);
 
@@ -585,6 +633,17 @@ export default {
 			/* Gold color for stars */
 			font-size: var(--font-size-content);
 			margin-right: 2px;
+		}
+
+		.review-actions {
+			display: inherit;
+			gap: inherit;
+
+			button {
+				padding: 0;
+				border: none;
+				background: none;
+			}
 		}
 
 		/* Add Your Rating Button */
@@ -629,7 +688,7 @@ export default {
 				.review-user-name {
 					font-size: var(--font-size-card);
 					font-weight: bold;
-					margin-left: 8px;
+					// margin-left: 8px;
 					/* Space between stars and username */
 					color: var(--text-color);
 				}
