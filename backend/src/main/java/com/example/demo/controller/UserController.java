@@ -3,11 +3,12 @@ package com.example.demo.controller;
 import com.example.demo.model.User;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.EmailService;
+import com.example.demo.service.Env;
 import com.example.demo.service.Lib;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
 import java.util.List;
@@ -15,7 +16,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api")
 public class UserController {
 
 	@Autowired
@@ -25,27 +26,28 @@ public class UserController {
 	private UserRepository userRepository;
 
 	// Store validation codes temporarily (In-memory storage)
-	private final Map<String, String> validationCodes = new ConcurrentHashMap<>();
-	private final Map<String, String> activeSessions = new ConcurrentHashMap<>();
 
-	@PostMapping("/request-code")
-	public ResponseEntity<String> requestValidationCode(@RequestBody Map<String, String> request) {
+	// POST api/user/request-code
+	@PostMapping("/users/request-code")
+	public ResponseEntity<Map<String, String>> requestValidationCode(@RequestBody Map<String, String> request) {
 		String email = request.get("email");
 		if (email == null || email.isEmpty()) {
-			return ResponseEntity.badRequest().body("Email is required.");
+			return Lib.RestBadRequest("Email is required.");
 		}
 
 		// Generate validation code
 		String code = Lib.ValidationCode();
-		validationCodes.put(email, code);
+		// System.out.println("Generated code: " + code);
+		// validationCodes.put(email, code);
+		Lib.storeValidationCode(email, code);
 
 		// Send the code via email
 		try {
 			emailService.sendEmail(email, "Your Validation Code", "Your code is: " + code);
-			return ResponseEntity.ok("Validation code sent successfully.");
+			return Lib.RestOk("Validation code sent successfully.");
 		} catch (IOException e) {
 			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send validation code.");
+			return Lib.RestServerError("Failed to send validation code.");
 		}
 	}
 
@@ -54,56 +56,46 @@ public class UserController {
 	 * @param request
 	 * @return
 	 */
-	@PostMapping("/verify-code")
-	public ResponseEntity<String> verifyCode(@RequestBody Map<String, String> request) {
+	@PostMapping("/users/verify-code")
+	public ResponseEntity<Map<String, String>> verifyCode(@RequestBody Map<String, String> request) {
 		String email = request.get("email");
 		String code = request.get("code");
 
 		if (email == null || code == null) {
-			return ResponseEntity.badRequest().body("Email and code are required.");
+			return Lib.RestBadRequest("Email and code are required.");
 		}
 
-		// Check if the code matches
-		String storedCode = validationCodes.get(email);
-		if (storedCode != null && storedCode.equals(code)) {
-			validationCodes.remove(email); // Remove the code after successful verification
-
-			// Store the code as a session (email -> code)
-			activeSessions.put(email, code);
-
-			// Create the user if not already exists
-			if (userRepository.findByEmail(email) == null) {
-				User user = new User(email, null); // No addresses for now
-				userRepository.save(user);
+		if (!Env.IS_DEVELOPING) {			
+			if (!Lib.isVerifyValidationCodeSuccess(email, code)) {
+				return Lib.RestUnauthorized("Invalid validation code.");
 			}
-
-			return ResponseEntity.ok("Login successful.");
-		} else {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid validation code.");
 		}
+
+		// System.out.println("storedCode: " + storedCode);
+		Lib.removeValidationCode(email);
+		Lib.storeActiveSession(email, code);
+
+		// Create the user if not already exists
+		if (userRepository.findByEmail(email) == null) {
+			User user = new User(email, null); // No addresses for now
+			userRepository.save(user);
+		}
+		return Lib.RestOk("Login successful.");
 	}
 
-	@GetMapping("/get-data")
+	@GetMapping("/users")
 	public ResponseEntity<?> getUserData(
 			@RequestParam String email,
 			@RequestParam String code,
 			@RequestParam(required = false) List<String> fields) {
-
-		// Step 1: Validate the session (email + code)
-		String sessionCode = activeSessions.get(email);
-		if (sessionCode == null || !sessionCode.equals(code)) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Session expired. Please login again.");
-		}
-
-		// Step 2: Retrieve the user from the database
-		User user = userRepository.findByEmail(email);
-		if (user == null) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+		User requestingUser = Lib.getRequestingUser(email, code, userRepository);
+		if (requestingUser == null) {
+			return Lib.userRestResponseErr;
 		}
 
 		// Step 3: Return all data if no fields are specified
 		if (fields == null || fields.isEmpty()) {
-			return ResponseEntity.ok(user); // Return full user object
+			return ResponseEntity.ok(requestingUser); // Return full user object
 		}
 
 		// Step 4: Create a response with only the requested fields
@@ -111,19 +103,19 @@ public class UserController {
 		for (String field : fields) {
 			switch (field.toLowerCase()) {
 				case "userid":
-					responseData.put("userId", user.getUserId());
+					responseData.put("userId", requestingUser.getUserId());
 					break;
 				case "email":
-					responseData.put("email", user.getEmail());
+					responseData.put("email", requestingUser.getEmail());
 					break;
 				case "addresses":
-					responseData.put("addresses", user.getAddresses());
+					responseData.put("addresses", requestingUser.getAddresses());
 					break;
 				case "createdat":
-					responseData.put("createdAt", user.getCreatedAt());
+					responseData.put("createdAt", requestingUser.getCreatedAt());
 					break;
 				case "updatedat":
-					responseData.put("updatedAt", user.getUpdatedAt());
+					responseData.put("updatedAt", requestingUser.getUpdatedAt());
 					break;
 				default:
 					// Ignore unknown fields or return an error message (your choice)
@@ -131,48 +123,35 @@ public class UserController {
 			}
 		}
 
-		// Step 5: Return the response data
 		return ResponseEntity.ok(responseData);
 	}
 
-	@PatchMapping("/update")
-	public ResponseEntity<String> updateUserProfile(@RequestParam String email, @RequestParam String code,
-			@RequestBody User userUpdates) {
+	@PatchMapping("/users")
+	public ResponseEntity<?> updateUserProfile(@RequestBody Map<String, Object> request) {
+		// Extract fields from the map
+		
+		List<String> newAddresses = (List<String>) request.get("addresses");
 
-		// Validate session
-		String sessionCode = activeSessions.get(email);
-		if (sessionCode == null || !sessionCode.equals(code)) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Session expired. Please login again.");
-		}
-
-		String updateUserEmail = userUpdates.getEmail();
-		if (updateUserEmail == null || !updateUserEmail.equals(email)) {
-			return ResponseEntity.badRequest().body("Mismatching user email.");
-		}
-
-		// Retrieve user
-		User existingUser = userRepository.findByEmail(email);
+		User existingUser = (User) Lib.getRequestingUser(request, userRepository);
 		if (existingUser == null) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+			return Lib.userRestResponseErr;
 		}
 
-		// Update addresses if provided
-		List<String> newAddresses = userUpdates.getAddresses();
+		// Validate addresses
 		if (newAddresses == null || newAddresses.isEmpty()) {
-			return ResponseEntity.badRequest().body("Invalid update request");
+			return Lib.RestBadRequest("Invalid update request.");
 		}
 
 		for (String address : newAddresses) {
 			if (!Lib.isValidAddress(address)) {
-				return ResponseEntity.badRequest().body("Invalid address: " + address);
+				return Lib.RestBadRequest("Invalid address: " + address);
 			}
 		}
 
+		// Update user addresses
 		existingUser.setAddresses(newAddresses);
-
-		// Save updated user
 		userRepository.save(existingUser);
-		return ResponseEntity.ok("User profile updated successfully.");
+		return Lib.RestOk("User profile updated successfully.");
 	}
 
 	/**
