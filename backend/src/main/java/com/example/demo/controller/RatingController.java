@@ -77,7 +77,7 @@ public class RatingController {
 		if (ratingStars < 0 || ratingStars > 5) {
 			return Lib.RestBadRequest("Invalid rating stars");
 		}
-		System.out.println("ratingStars: " + ratingStars);
+		// System.out.println("ratingStars: " + ratingStars);
 		String ratingDescription = (String) request.get("ratingDescription");
 		Rating rating = new Rating(product, user, ratingStars, ratingDescription);
 		ratingRepository.save(rating);
@@ -105,7 +105,7 @@ public class RatingController {
 		if (ratingsFromUserProduct.size() == 0) {
 			return Lib.RestNotFound("Rating not found for product ID: " + productId);
 		}
-		System.out.println("ratingStars Updated: " + ratingStars);
+		// System.out.println("ratingStars Updated: " + ratingStars);
 
 		Rating rating = ratingsFromUserProduct.get(0);
 		rating.setRatingStars(ratingStars);
