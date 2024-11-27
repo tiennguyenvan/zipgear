@@ -23,7 +23,7 @@
 						<span class="detail">
 							{{ order.date }} {{ order.amount }}: {{ order.items }}
 
-							<a v-if="!isAdmin() && order.status === 'Processing'" href="#" class="cancel action"
+							<a v-if="!isAdmin() && order.status === 'PROCESSING'" href="#" class="cancel action"
 								@click.prevent="confirmCancelOrder(order.orderId)">Cancel</a>
 						</span>
 						<p class="address">To: {{ order.address }}</p>
@@ -73,6 +73,7 @@
 import NavBar from '@/components/NavBar.vue';
 import Env from '@/utils/Env';
 import User from '@/utils/User';
+import axios from 'axios';
 
 export default {
 	name: 'UserProfile',
@@ -249,11 +250,19 @@ export default {
 		async cancelOrder(orderId) {
 			try {
 				const { email, code } = User.getUserEmailCode();
-				const response = await fetch(
-					`${Env.API_BASE_URL}/orders/${orderId}?email=${email}&code=${code}`,
-					{ method: "PUT" }
-				);
-				if (!response.ok) throw new Error("Failed to cancel order");
+				// const response = await fetch(
+				// 	`${Env.API_BASE_URL}/orders/${orderId}?email=${email}&code=${code}`,
+				// 	{ method: "PUT" }
+				// );
+				// if (!response.ok) throw new Error("Failed to cancel order");
+
+				const response = await axios.put(`${Env.API_BASE_URL}/orders/${orderId}?`, {
+					email,
+                    code,
+                    orderStatus: 'CANCELLED'
+				});
+
+				if (!response.status === 200) throw new Error("Failed to cancel order");
 
 				this.updateMessage = "Order canceled successfully.";
 				await this.fetchOrders();
