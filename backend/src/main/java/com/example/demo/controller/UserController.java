@@ -43,7 +43,8 @@ public class UserController {
 
 		// Send the code via email
 		try {
-			emailService.sendEmail(email, "Your Validation Code", "Your code is: " + code);
+			emailService.sendEmail(email, "zipGear Validation Code", "zipGear Validation Code is: " + code);
+			System.out.println("zipGear Validation Code: " + code);
 			return Lib.RestOk("Validation code sent successfully.");
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -65,7 +66,7 @@ public class UserController {
 			return Lib.RestBadRequest("Email and code are required.");
 		}
 
-		if (!Env.IS_DEVELOPING) {			
+		if (!Env.IS_DEVELOPING) {
 			if (!Lib.isVerifyValidationCodeSuccess(email, code)) {
 				return Lib.RestUnauthorized("Invalid validation code.");
 			}
@@ -129,7 +130,7 @@ public class UserController {
 	@PatchMapping("/users")
 	public ResponseEntity<?> updateUserProfile(@RequestBody Map<String, Object> request) {
 		// Extract fields from the map
-		
+
 		List<String> newAddresses = (List<String>) request.get("addresses");
 
 		User existingUser = (User) Lib.getRequestingUser(request, userRepository);

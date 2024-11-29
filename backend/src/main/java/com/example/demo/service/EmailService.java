@@ -34,8 +34,8 @@ public class EmailService {
         request.setBody(mail.build());
 
         Response response = sendGrid.api(request);
-        System.out.println(response.getStatusCode());
-        System.out.println(response.getBody());
-        System.out.println(response.getHeaders());
+        // System.out.println(response.getStatusCode());
+        // System.out.println(response.getBody());
+        // System.out.println(response.getHeaders());
     }
 }

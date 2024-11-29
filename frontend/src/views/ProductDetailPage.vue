@@ -472,6 +472,7 @@ export default {
 
 		img {
 			width: 100%;
+			border-radius: 6px;
 		}
 
 		.thumbnail-wrapper {
