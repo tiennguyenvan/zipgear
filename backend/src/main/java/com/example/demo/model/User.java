@@ -2,7 +2,11 @@ package com.example.demo.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "users", uniqueConstraints = @UniqueConstraint(columnNames = "email")) // Ensure email is unique
@@ -15,10 +19,23 @@ public class User {
 	@Column(nullable = false, unique = true) // Email should be unique
 	private String email;
 
-	@ElementCollection // Embeds the list of addresses in a separate join table
+	// Embeds the list of addresses in a separate join table
+	// we have to do this because the address could have the "," commas
+	@ElementCollection
 	@CollectionTable(name = "user_addresses", joinColumns = @JoinColumn(name = "user_id"))
-	@Column(name = "address")
+	@Column(name = "addresses")
 	private List<String> addresses;
+
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)	
+	@JsonIgnore
+    private List<Rating> ratings = new ArrayList<>();
+
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)	
+	@JsonIgnore
+    private List<Order> orders = new ArrayList<>();
+
+	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)	
+	private Cart cart;
 
 	@Column(nullable = false, updatable = false)
 	private LocalDateTime createdAt;
@@ -26,19 +43,29 @@ public class User {
 	@Column(nullable = false)
 	private LocalDateTime updatedAt;
 
+	@PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
+	@PreUpdate
+	protected void onUpdate() {
+		// Update timestamp automatically before saving changes
+		this.updatedAt = LocalDateTime.now();
+	}
+
 	// Constructors
 	public User() {
 		// Initialize timestamps when creating a user
 		this.createdAt = LocalDateTime.now();
 		this.updatedAt = LocalDateTime.now();
 	}
-	
+
 	public User(String email, List<String> addresses) {
-        this.email = email;
-        this.addresses = addresses;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
+		this.email = email;
+		this.addresses = addresses;
+		this.createdAt = LocalDateTime.now();
+		this.updatedAt = LocalDateTime.now();
+	}
 
 	// Getters and Setters
 	public Long getUserId() {
@@ -80,10 +107,5 @@ public class User {
 	public void setUpdatedAt(LocalDateTime updatedAt) {
 		this.updatedAt = updatedAt;
 	}
-	
-	// Method triggered before an update
-	@PreUpdate
-	protected void onUpdate() {
-		this.updatedAt = LocalDateTime.now(); // Update timestamp automatically before saving changes
-	}
+
 }
