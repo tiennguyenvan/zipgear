@@ -15,11 +15,13 @@
 
 1. Click .env on the root folder with the following format
    ```env
-   VUE_APP_SENDGRID_API_KEY=___SETUP_API_KEY_BY_YOURSELF___
-   VUE_APP_SENDGRID_FROM_EMAIL=contact@sneeit.com
-   VUE_APP_ADMIN_EMAIL=nguyentien.jobs@gmail.com
-   VUE_APP_IS_DEVELOPING=true
-   VUE_APP_VALIDATION_CODE_LENGTH=8
+   VUE_APP_SENDGRID_API_KEY=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
+VUE_APP_SENDGRID_FROM_EMAIL=contact@sneeit.com
+VUE_APP_ADMIN_EMAIL=nguyentien.jobs@gmail.com
+VUE_APP_IS_DEVELOPING=false
+VUE_APP_VALIDATION_CODE_LENGTH=8
+VUE_APP_API_BASE_URL=http://localhost:8080/api
+VUE_APP_SERVER_URL=http://localhost:8080
    ```
 2. Link the file to backend:
 
