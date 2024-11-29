@@ -90,7 +90,7 @@ public class DemoApplication {
 			macbookPro.setPrice(new BigDecimal("4399"));
 			macbookPro.setImageSrcs(List.of("uploads/zipgear-demo-image-macbook-m4-pro-01.png", "uploads/zipgear-demo-image-macbook-m4-pro-02.png"));
 			macbookPro.setStock(10);
-			macbookPro.setAverageRating(5.0);
+			macbookPro.setAverageRating(4.9);
 			macbookPro.addRating(mockUser3, 5, "Excellent headphone, very rich and reliable.");
 
 			
@@ -99,6 +99,7 @@ public class DemoApplication {
 			dellXps.setPrice(new BigDecimal("1299"));
 			dellXps.setImageSrcs(List.of("uploads/zipgear-demo-image-dell-xps-13-01.png", "uploads/zipgear-demo-image-dell-xps-13-02.png"));
 			dellXps.setStock(15);
+			dellXps.setAverageRating(4.5);
 			// laptop2.setAverageRating(4.0);
 
 			
@@ -107,6 +108,7 @@ public class DemoApplication {
 			msSurface.setPrice(new BigDecimal("1399"));
 			msSurface.setImageSrcs(List.of("uploads/zipgear-demo-image-ms-surface-01.png", "uploads/zipgear-demo-image-ms-surface-02.png"));
 			msSurface.setStock(5);
+			msSurface.setAverageRating(3.8);
 			// laptop3.setAverageRating(4.8);
 
 			
@@ -127,6 +129,7 @@ public class DemoApplication {
 			samsungGalaxy.setPrice(new BigDecimal("1299.99"));
 			samsungGalaxy.setImageSrcs(List.of("uploads/zipgear-demo-image-samsung-galaxy-s24-01.png", "uploads/zipgear-demo-image-samsung-galaxy-s24-02.png"));
 			samsungGalaxy.setStock(30);
+			samsungGalaxy.setAverageRating(3.0);
 			// mobile2.setAverageRating(4.7);
 
 			
@@ -135,6 +138,7 @@ public class DemoApplication {
 			googlePixel.setPrice(new BigDecimal("1099"));
 			googlePixel.setImageSrcs(List.of("uploads/zipgear-demo-image-google-pixel-9-01.png", "uploads/zipgear-demo-image-google-pixel-9-02.png"));
 			googlePixel.setStock(20);
+			googlePixel.setAverageRating(4.4);
 			// mobile3.setAverageRating(4.6);
 
 			
@@ -149,6 +153,7 @@ public class DemoApplication {
 			sonyHeadphone.setImageSrcs(
 					List.of("uploads/zipgear-demo-image-sony-wh-1000xm5-01.png", "uploads/zipgear-demo-image-sony-wh-1000xm5-02.png"));
 			sonyHeadphone.setStock(50);
+			sonyHeadphone.setAverageRating(4.2);
 			// headphone1.setAverageRating(4.2);
 
 			
@@ -158,6 +163,7 @@ public class DemoApplication {
 			AirPodsPro.setImageSrcs(
 				List.of("uploads/zipgear-demo-image-apple-airpods-pro-01.png", "uploads/zipgear-demo-image-apple-airpods-pro-02.png"));
 			AirPodsPro.setStock(40);
+			AirPodsPro.setAverageRating(5.0);
 			// headphone2.setAverageRating(4.4);
 
 			
@@ -167,6 +173,7 @@ public class DemoApplication {
 			AirPodsMax.setImageSrcs(
 					List.of("uploads/zipgear-demo-image-apple-airpods-max-01.png", "uploads/zipgear-demo-image-apple-airpods-max-02.png"));
 			AirPodsMax.setStock(35);
+			AirPodsMax.setAverageRating(2.1);
 			// headphone3.setAverageRating(5.0);
 			
 
