@@ -1,6 +1,7 @@
 # zipGear
 
 **E-commerce app using SpringBoot and Vue.js for ZIPGEAR Group Project**
+<br/>
 **[Watch on YouTube](https://www.youtube.com/watch?v=Uh7kjCHPAJQ)**
 [![Watch the video](https://img.youtube.com/vi/Uh7kjCHPAJQ/maxresdefault.jpg)](https://www.youtube.com/watch?v=Uh7kjCHPAJQ)
 
