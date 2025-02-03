@@ -2,6 +2,8 @@
 
 **E-commerce app using SpringBoot and Vue.js for ZIPGEAR Group Project**
 
+[![Watch the video](https://img.youtube.com/vi/Uh7kjCHPAJQ/maxresdefault.jpg)](https://www.youtube.com/watch?v=Uh7kjCHPAJQ)
+
 ## Overview
 **zipGear** is a full-featured e-commerce application for purchasing computer parts and related services. Built using **Spring Boot** for the backend and **Vue.js** for the frontend, the project focuses on delivering a seamless shopping experience. Key functionalities include product search, comparison, order management, and customer support.
 
